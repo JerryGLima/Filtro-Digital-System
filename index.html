@@ -1,1 +1,1786 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>FILTRO DIGITAL 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050a0f;
+            --surface: #0d1520;
+            --surface2: #111c2a;
+            --border: rgba(255,255,255,0.07);
+            --border-bright: rgba(255,255,255,0.15);
 
+            --accent: #00e5ff;
+            --accent-dim: rgba(0, 229, 255, 0.08);
+            --accent-mid: rgba(0, 229, 255, 0.2);
+
+            --green: #00e676;
+            --green-dim: rgba(0, 230, 118, 0.1);
+            --yellow: #ffea00;
+            --yellow-dim: rgba(255, 234, 0, 0.1);
+            --red: #ff1744;
+            --red-dim: rgba(255, 23, 68, 0.1);
+
+            --text: #f0f4f8;
+            --text-muted: #6b8099;
+            --text-dim: #3d5166;
+
+            --radius: 14px;
+            --radius-sm: 8px;
+            --font-display: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-display);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── GRID NOISE BACKGROUND ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,229,255,0.06) 0%, transparent 60%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.25rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .logo-mark {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            color: #000;
+            flex-shrink: 0;
+        }
+
+        .logo-name {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .logo-version {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: var(--accent);
+            letter-spacing: 1px;
+        }
+
+        .header-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-mid);
+            padding: 5px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(0,229,255,0); }
+        }
+
+        /* ── MAIN WRAPPER ── */
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 0 1rem 4rem;
+        }
+
+        /* ── VIEWS ── */
+        .view { display: none; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* ── HOME VIEW ── */
+        #view-home {
+            align-items: center;
+            text-align: center;
+            padding-top: 3rem;
+            padding-bottom: 2rem;
+            gap: 0;
+        }
+
+        .hero-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-mid);
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 9vw, 4.5rem);
+            font-weight: 900;
+            line-height: 1.0;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            margin-bottom: 1.25rem;
+        }
+
+        .hero-title .accent { color: var(--accent); }
+
+        .hero-sub {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            max-width: 480px;
+            line-height: 1.6;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        /* Search Box */
+        .search-wrapper {
+            width: 100%;
+            max-width: 680px;
+            margin-bottom: 2rem;
+        }
+
+        .search-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .search-input-row {
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input-row:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim), 0 0 30px rgba(0,229,255,0.05);
+        }
+
+        .search-icon {
+            padding: 0 14px;
+            color: var(--text-dim);
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            padding: 14px 0;
+            min-width: 0;
+        }
+
+        .search-input::placeholder { color: var(--text-dim); }
+
+        .btn-analyze {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0 22px;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .btn-analyze:hover { background: #33ecff; }
+        .btn-analyze:active { transform: scale(0.97); }
+
+        .search-hint {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-align: left;
+            padding: 0 4px;
+        }
+
+        /* Feature pills */
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .pill {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── HOW IT WORKS CARDS ── */
+        .how-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 680px;
+            margin-top: 2.5rem;
+        }
+
+        @media (min-width: 600px) {
+            .how-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .how-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+        }
+
+        @media (min-width: 600px) {
+            .how-card { flex-direction: column; align-items: flex-start; }
+        }
+
+        .how-num {
+            font-family: var(--font-mono);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .how-text h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .how-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* ── LOADING VIEW ── */
+        #view-loading {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1.5rem;
+            padding-top: 3rem;
+        }
+
+        .loading-icon {
+            width: 64px;
+            height: 64px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-title {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .loading-step {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            min-height: 1.4em;
+        }
+
+        .progress-track {
+            width: 240px;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px var(--accent);
+            width: 0%;
+        }
+
+        .steps-log {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+            width: 240px;
+        }
+
+        .step-line.done { color: var(--green); }
+        .step-line.active { color: var(--accent); }
+
+        /* ── ERROR VIEW ── */
+        #view-error {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+            padding-top: 3rem;
+        }
+
+        .error-icon {
+            color: var(--yellow);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .error-desc {
+            color: var(--text-muted);
+            max-width: 380px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .btn-retry {
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            color: var(--text);
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-retry:hover { background: var(--surface2); }
+
+        /* ── RESULTS VIEW ── */
+        #view-results {
+            gap: 1rem;
+            padding-top: 1.25rem;
+        }
+
+        /* Verdict Banner */
+        .verdict-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 1.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .verdict-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .verdict-card.safe::before { background: var(--green); }
+        .verdict-card.warn::before { background: var(--yellow); }
+        .verdict-card.danger::before { background: var(--red); }
+
+        .verdict-orb {
+            width: 68px;
+            height: 68px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            color: #000;
+        }
+
+        .verdict-card.safe .verdict-orb { background: var(--green); box-shadow: 0 0 24px rgba(0,230,118,0.3); }
+        .verdict-card.warn .verdict-orb { background: var(--yellow); box-shadow: 0 0 24px rgba(255,234,0,0.3); }
+        .verdict-card.danger .verdict-orb { background: var(--red); box-shadow: 0 0 24px rgba(255,23,68,0.3); }
+
+        .verdict-body { flex: 1; min-width: 0; }
+
+        .verdict-tag {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            letter-spacing: 2px;
+            font-weight: 700;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
+            border: 1px solid;
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            margin-bottom: 6px;
+        }
+
+        .verdict-card.safe .verdict-tag { color: var(--green); border-color: var(--green); }
+        .verdict-card.warn .verdict-tag { color: var(--yellow); border-color: var(--yellow); }
+        .verdict-card.danger .verdict-tag { color: var(--red); border-color: var(--red); }
+
+        .verdict-label {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .verdict-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        .verdict-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .hash-tag {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            background: rgba(0,0,0,0.4);
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .btn-new {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-new:hover { color: var(--text); border-color: var(--border-bright); }
+
+        /* Metrics Strip */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 600px) {
+            .metrics-strip { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .metric-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-dim);
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .metric-sub {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+        }
+
+        /* AI Summary Box */
+        .ai-summary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .ai-diagnosis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .diag-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
+        }
+
+        .diag-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .diag-info h5 {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+
+        .diag-info p {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        .ai-conclusion {
+            background: var(--surface2);
+            border: 1px solid var(--accent-mid);
+            border-radius: var(--radius-sm);
+            padding: 0.9rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .ai-conclusion strong { color: var(--accent); }
+
+        /* Sources */
+        .sources-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .source-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .source-card:hover { border-color: var(--border-bright); }
+        .source-card.origin-card { border-color: rgba(0,229,255,0.3); }
+
+        .source-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .type-badge {
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 9px;
+            border-radius: 4px;
+        }
+
+        .type-oficial { background: rgba(0,229,255,0.12); color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
+        .type-imprensa { background: rgba(150,160,180,0.1); color: #8896a8; border: 1px solid rgba(150,160,180,0.2); }
+        .type-blog { background: rgba(255,234,0,0.1); color: #ffe033; border: 1px solid rgba(255,234,0,0.25); }
+        .type-checagem { background: rgba(0,230,118,0.1); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+        .type-analisada { background: rgba(255,23,68,0.1); color: #ff4d6a; border: 1px solid rgba(255,23,68,0.25); }
+
+        .source-date {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+        }
+
+        .source-title {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
+        }
+
+        .source-excerpt {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+            margin-bottom: 0.9rem;
+            font-weight: 400;
+        }
+
+        .source-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .conf-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .conf-track {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.07);
+            border-radius: 2px;
+            overflow: hidden;
+            max-width: 100px;
+        }
+
+        .conf-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s ease;
+        }
+
+        .conf-label {
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .btn-source-link {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            display: grid;
+            place-items: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-source-link:hover { color: var(--text); border-color: var(--border-bright); }
+
+        /* Timeline */
+        .timeline-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            overflow: hidden;
+        }
+
+        .timeline-scroll {
+            overflow-x: auto;
+            padding-bottom: 0.75rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .timeline-scroll::-webkit-scrollbar { height: 3px; }
+        .timeline-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 2px; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: var(--accent-mid); border-radius: 2px; }
+
+        .timeline-inner {
+            display: flex;
+            align-items: flex-start;
+            gap: 0;
+            position: relative;
+            padding: 2rem 1rem 1rem;
+            min-width: 560px;
+        }
+
+        .timeline-inner::before {
+            content: '';
+            position: absolute;
+            top: 42px;
+            left: 2rem;
+            right: 2rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+        }
+
+        .tl-node {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+        }
+
+        .tl-date {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: var(--text-dim);
+        }
+
+        .tl-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            display: grid;
+            place-items: center;
+            color: var(--text-dim);
+            transition: all 0.2s;
+        }
+
+        .tl-icon.origin { border-color: var(--red); color: var(--red); box-shadow: 0 0 10px var(--red-dim); }
+        .tl-icon.analyzed { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
+        .tl-icon.safe { border-color: var(--green); color: var(--green); }
+
+        .tl-badge {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            text-transform: uppercase;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .tl-title {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            max-width: 90px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Suggestions Section */
+        .suggestions-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem;
+        }
+
+        .sug-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .sug-text {
+            flex: 1;
+        }
+
+        .sug-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 3px;
+        }
+
+        .sug-desc {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 1.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-pills {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .footer-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-dim);
+        }
+
+        .footer-pill::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .view.active { animation: fadeSlide 0.4s ease-out; }
+
+        /* ── RESPONSIVE ADJUSTMENTS ── */
+        @media (max-width: 480px) {
+            .verdict-meta { display: none; }
+            .verdict-card { flex-direction: row; }
+            .verdict-label { font-size: 1.4rem; }
+            .ai-diagnosis-grid { grid-template-columns: 1fr; }
+            .metrics-strip { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (min-width: 640px) {
+            main { padding: 0 1.5rem 5rem; }
+            header { padding: 0 2rem; }
+            #view-home { padding-top: 5rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo" onclick="resetApp()">
+        <div class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+        </div>
+        <div>
+            <div class="logo-name">Filtro Digital</div>
+            <div class="logo-version">v2.0 · GEMINI IA</div>
+        </div>
+    </div>
+    <div class="header-status">
+        <div class="pulse-dot"></div>
+        IA ATIVA
+    </div>
+</header>
+
+<main>
+
+    <div id="view-home" class="view active">
+        <div class="hero-badge">🛡️ Monitoramento de Desinformação com IA</div>
+
+        <h1 class="hero-title">
+            DETECÇÃO<br><span class="accent">AVANÇADA DE</span><br>DESINFORMAÇÃO
+        </h1>
+
+        <p class="hero-sub">
+            Cole um link de notícia ou digite um tema. A IA analisa fontes reais da internet, detecta vieses e identifica padrões de desinformação.
+        </p>
+
+        <div class="search-wrapper">
+            <div class="search-box">
+                <div class="search-input-row">
+                    <div class="search-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <input type="text" id="mainInput" class="search-input"
+                        placeholder="Cole um link ou pesquise um tema..."
+                        autocomplete="off" autocorrect="off" spellcheck="false">
+                    <button class="btn-analyze" onclick="startAnalysis()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Analisar
+                    </button>
+                </div>
+                <div class="search-hint">↩ Enter para analisar · Suporta links HTTP e termos de busca</div>
+            </div>
+        </div>
+
+        <div class="feature-pills">
+            <span class="pill">🔗 Leitura de Links</span>
+            <span class="pill">🧠 Google Gemini</span>
+            <span class="pill">📰 Wikipedia Cruzada</span>
+            <span class="pill">🤖 Detecção de Bots</span>
+            <span class="pill">📡 Câmara de Eco</span>
+        </div>
+
+        <div class="how-grid">
+            <div class="how-card">
+                <div class="how-num">01</div>
+                <div class="how-text">
+                    <h4>Extração de Conteúdo</h4>
+                    <p>Lemos o site colado e extraímos o texto real via proxy seguro.</p>
+                </div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">02</div>
+                <div class="how-text">
+                    <h4>Cruzamento de Fontes</h4>
+                    <p>Comparamos com fontes confiáveis da web para identificar divergências.</p>
+                </div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">03</div>
+                <div class="how-text">
+                    <h4>Veredito da IA</h4>
+                    <p>O Gemini analisa viés emocional, bots e padrões de desinformação.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-loading" class="view">
+        <div class="loading-icon"></div>
+        <div class="loading-title">Gemini Processando</div>
+        <div class="loading-step" id="loadingStep">Iniciando varredura...</div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div class="steps-log" id="stepsLog"></div>
+    </div>
+
+    <div id="view-error" class="view">
+        <div class="error-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="error-title" id="errorTitle">Erro na Análise</div>
+        <p class="error-desc" id="errorDesc">Algo deu errado. Tente novamente.</p>
+        <button class="btn-retry" onclick="resetApp()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+            Tentar novamente
+        </button>
+    </div>
+
+    <div id="view-results" class="view">
+
+        <div class="verdict-card" id="verdictCard">
+            <div class="verdict-orb" id="verdictOrb">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div class="verdict-body">
+                <div class="verdict-tag" id="verdictTag">VERIFICANDO</div>
+                <div class="verdict-label" id="verdictLabel">—</div>
+                <div class="verdict-desc" id="verdictDesc">Processando análise...</div>
+            </div>
+            <div class="verdict-meta">
+                <div class="hash-tag" id="hashId">HASH: #00000</div>
+                <button class="btn-new" onclick="resetApp()">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nova análise
+                </button>
+            </div>
+        </div>
+
+        <div class="metrics-strip">
+            <div class="metric-tile">
+                <div class="metric-label">Fontes</div>
+                <div class="metric-value" id="metricSources" style="color:var(--accent)">—</div>
+                <div class="metric-sub">Únicas na web</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Diversidade</div>
+                <div class="metric-value" id="metricDiversity">—</div>
+                <div class="metric-sub" id="metricDiversitySub">—</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Cópias</div>
+                <div class="metric-value" id="metricDuplicates">—</div>
+                <div class="metric-sub">Padrão de bot</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Viés IA</div>
+                <div class="metric-value" id="metricBias">—</div>
+                <div class="metric-sub" id="metricBiasSub">—</div>
+            </div>
+        </div>
+
+        <div class="ai-summary">
+            <div class="section-label">Diagnóstico da Inteligência Artificial</div>
+
+            <div class="ai-diagnosis-grid">
+                <div class="diag-item">
+                    <div class="diag-icon" id="echoIcon" style="background:var(--green-dim); color:var(--green);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    </div>
+                    <div class="diag-info">
+                        <h5>Câmara de Eco</h5>
+                        <p id="echoStatus">Verificando...</p>
+                    </div>
+                </div>
+                <div class="diag-item">
+                    <div class="diag-icon" id="botIcon" style="background:var(--accent-dim); color:var(--accent);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </div>
+                    <div class="diag-info">
+                        <h5>Padrão de Bots</h5>
+                        <p id="botStatus">Verificando...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ai-conclusion">
+                <p id="aiConclusionText"><strong>RESUMO DA IA:</strong> Aguardando processamento...</p>
+            </div>
+        </div>
+
+        <div class="sources-section">
+            <div class="section-label" style="justify-content:space-between;">Fontes Reais Extraídas da Web <span id="sourcesBadge" style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:1px;"></span></div>
+            <div class="sources-list" id="sourcesList"></div>
+        </div>
+
+        <div class="timeline-section">
+            <div class="section-label">Linha do Tempo da Informação</div>
+            <div class="timeline-scroll">
+                <div class="timeline-inner" id="timelineContainer"></div>
+            </div>
+        </div>
+
+        <div class="suggestions-section" id="suggestionsSection">
+            <div class="section-label">💡 Sugestões para Aprofundar a Pesquisa</div>
+            <div class="suggestion-list" id="suggestionList"></div>
+        </div>
+
+    </div>
+
+</main>
+
+<footer>
+    <span>© 2026 FILTRO DIGITAL · MOTOR GEMINI ATIVO</span>
+    <div class="footer-pills">
+        <span class="footer-pill" style="cursor:pointer; color:var(--accent);" onclick="resetarChaves()">🔑 CONFIGURAR APIS</span>
+        <span class="footer-pill">DADOS REAIS</span>
+        <span class="footer-pill">ALLORIGINS PROXY</span>
+        <span class="footer-pill">GNEWS API</span>
+        <span class="footer-pill">GEMINI API</span>
+    </div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════════
+// FILTRO DIGITAL 2.0 — Configurações de API (BYOK)
+// ══════════════════════════════════════════════════════════
+
+// Carrega as chaves salvas no navegador ou inicia vazias
+let GEMINI_KEY = localStorage.getItem('gemini_key') || "";
+let GNEWS_KEY = localStorage.getItem('gnews_key') || "";
+
+// Função para pedir as chaves ao usuário
+function configurarChaves() {
+    if (!GEMINI_KEY) {
+        let inputGemini = prompt("🔑 Bem-vindo ao Filtro Digital!\n\nPara a IA funcionar, cole sua GEMINI API KEY abaixo:\n(Ela ficará salva apenas localmente no seu navegador)");
+        if (inputGemini) {
+            GEMINI_KEY = inputGemini.trim();
+            localStorage.setItem('gemini_key', GEMINI_KEY);
+        }
+    }
+    
+    // Só pede a GNews se o Gemini já estiver configurado e se a GNews ainda não estiver
+    if (!GNEWS_KEY && GEMINI_KEY) {
+        let inputGnews = prompt("📰 (Opcional) Cole sua GNEWS API KEY para buscar notícias em tempo real.\n\nSe você não tiver uma ou quiser usar a Wikipedia gratuitamente, apenas deixe em branco e clique em OK.");
+        if (inputGnews) {
+            GNEWS_KEY = inputGnews.trim();
+            localStorage.setItem('gnews_key', GNEWS_KEY);
+        }
+    }
+}
+
+// Função para limpar as chaves e recomeçar
+function resetarChaves() {
+    if(confirm("Deseja apagar as chaves de API salvas no seu navegador?")) {
+        localStorage.removeItem('gemini_key');
+        localStorage.removeItem('gnews_key');
+        GEMINI_KEY = "";
+        GNEWS_KEY = "";
+        alert("Chaves removidas com sucesso.");
+        configurarChaves();
+    }
+}
+
+// Inicia a verificação de chaves assim que a página carrega
+configurarChaves();
+
+const CATEGORIES = {
+    'imprensa': 'Imprensa',
+    'oficial': 'Oficial',
+    'blog': 'Blog',
+    'checagem': 'Checagem',
+    'analisada': 'Link Analisado',
+    'gnews': 'Notícia Real'
+};
+
+// ── VIEW MANAGER ──
+function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+}
+
+function resetApp() {
+    document.getElementById('mainInput').value = '';
+    showView('home');
+}
+
+document.getElementById('mainInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') startAnalysis();
+});
+
+// ── PROGRESS LOG ──
+function logStep(text, state = 'active') {
+    const log = document.getElementById('stepsLog');
+    const prev = log.querySelector('.step-line.active');
+    if (prev) { prev.classList.replace('active', 'done'); prev.textContent = '✓ ' + prev.textContent.slice(2); }
+    const el = document.createElement('div');
+    el.className = `step-line ${state}`;
+    el.textContent = `› ${text}`;
+    log.appendChild(el);
+    document.getElementById('loadingStep').textContent = text;
+}
+
+function setProgress(pct) {
+    document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ── UTILS ──
+function stripHtml(str) { return str ? str.replace(/<[^>]*>/g, '') : ''; }
+function randomHash() { return '#' + Math.floor(10000 + Math.random() * 90000); }
+
+// ══════════════════════════════════════════════════════════
+// 📰 GNEWS API — Busca notícias via Proxy AllOrigins para evitar bloqueios
+// ══════════════════════════════════════════════════════════
+async function fetchGNews(query) {
+    if (!GNEWS_KEY) return null; // sem chave, pula para Wikipedia
+
+    // Construímos a URL original do GNews
+    const targetUrl = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=pt&country=br&max=6&token=${GNEWS_KEY}`;
+    
+    // Passamos a URL original por dentro do AllOrigins (Isso resolve 100% dos erros CORS)
+    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
+    
+    try {
+        const res = await fetch(proxyUrl);
+        if (!res.ok) throw new Error(`Proxy HTTP falhou: ${res.status}`);
+        
+        const proxyData = await res.json();
+        
+        // O AllOrigins retorna o conteúdo dentro de "contents" como string, precisamos converter pra JSON
+        const gnewsData = JSON.parse(proxyData.contents);
+        
+        // Se a API da GNews retornar um erro interno (ex: token inválido)
+        if (gnewsData.errors) throw new Error(gnewsData.errors[0]);
+
+        return gnewsData.articles || [];
+    } catch (e) {
+        console.warn('GNews falhou, usando Wikipedia como fallback:', e);
+        return null;
+    }
+}
+
+// ── WIKIPEDIA FALLBACK ──
+async function fetchWikipedia(query) {
+    const url = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data.query?.search || []).slice(0, 6);
+}
+
+// ══════════════════════════════════════════════════════════
+// 🤖 GEMINI — Extrai tema do artigo
+// ══════════════════════════════════════════════════════════
+async function extractTopicWithGemini(text) {
+    // Voltamos para o modelo ativo: gemini-2.5-flash
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+    const prompt = `Resuma este texto em no máximo 4 palavras-chave em português identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
+    const res = await fetch(url, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+}
+
+// ══════════════════════════════════════════════════════════
+// 🤖 GEMINI — Analisa viés, bots e câmara de eco
+// ══════════════════════════════════════════════════════════
+async function analyzeWithGemini(snippets, topic) {
+    // Voltamos para o modelo ativo: gemini-2.5-flash
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
+    
+    const prompt = `Você é um sistema profissional de detecção de desinformação. Analise os trechos abaixo sobre o tema "${topic}".
+[Fonte 1] é o conteúdo fornecido pelo usuário. As demais são fontes cruzadas da web/notícias.
+
+Avalie:
+1. Linguagem emocional ou enviesada
+2. Câmara de eco (fontes não diversas ecoando mesma narrativa duvidosa)
+3. Cópias idênticas (padrão bot)
+4. Conclusão de 1 frase direta sobre confiabilidade
+
+Textos:
+${snippets.map((s, i) => `[Fonte ${i + 1}]: ${s}`).join('\n\n')}
+
+ATENÇÃO: Você DEVE retornar APENAS um objeto JSON válido. O JSON deve ter EXATAMENTE esta estrutura e chaves:
+{
+  "biasLevel": "Baixo",
+  "biasIntensity": 15,
+  "echoChamberDetected": false,
+  "botReplicationDetected": false,
+  "duplicateCount": 0,
+  "aiConclusion": "Uma frase resumindo o veredito"
+}`;
+
+    // Removemos o responseSchema restrito que causava o Erro 400
+    const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+            responseMimeType: "application/json"
+        }
+    };
+
+    // Reduzi para 3 tentativas para evitar que o carregamento fique infinito
+    for (let i = 0; i < 3; i++) {
+        try {
+            const res = await fetch(url, {
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            // Adicionei um log detalhado. Se falhar, agora veremos o motivo exato no F12!
+            if (!res.ok) {
+                const errorData = await res.text();
+                console.error("Detalhes do Erro da API Gemini:", errorData);
+                throw new Error(`HTTP ${res.status}`);
+            }
+            
+            const data = await res.json();
+            let txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            
+            if (txt) {
+                // Limpeza de segurança caso a IA retorne o JSON dentro de blocos de código Markdown
+                txt = txt.replace(/```json/gi, '').replace(/```/g, '').trim();
+                return JSON.parse(txt);
+            }
+            throw new Error("Resposta vazia da IA");
+            
+        } catch (err) {
+            console.warn(`Tentativa ${i + 1} de comunicação com a IA falhou.`, err);
+            if (i === 2) throw err;
+            await new Promise(r => setTimeout(r, [1000, 2000][i])); // Espera antes de tentar de novo
+        }
+    }
+}
+
+// ══════════════════════════════════════════════════════════
+// 🚀 FLUXO PRINCIPAL
+// ══════════════════════════════════════════════════════════
+async function startAnalysis() {
+    if (!GEMINI_KEY) {
+        alert("A chave da API do Gemini é obrigatória para realizar a análise. Clique em 'Configurar APIs' no rodapé para inseri-la.");
+        configurarChaves();
+        return;
+    }
+
+    const input = document.getElementById('mainInput').value.trim();
+    if (!input) { alert("Insira um link ou tema para analisar."); return; }
+
+    document.getElementById('stepsLog').innerHTML = '';
+    showView('loading');
+    setProgress(5);
+
+    const isUrl = /^https?:\/\//i.test(input);
+    let searchTopic = input;
+    let originalArticleSource = null;
+
+    // ── ETAPA 1: Leitura de URL ──
+    if (isUrl) {
+        logStep("Link detectado. Extraindo conteúdo...");
+        setProgress(15);
+        try {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(input)}`;
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error('Proxy falhou');
+            const data = await res.json();
+            const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+            const title = doc.querySelector('title')?.textContent || 'Artigo Analisado';
+            const paragraphs = Array.from(doc.querySelectorAll('p'))
+                .map(p => p.textContent.trim()).filter(t => t.length > 50)
+                .join(' ').substring(0, 2500);
+
+            if (!paragraphs) throw new Error("Nenhum texto encontrado.");
+
+            logStep("Identificando tema com IA Gemini...");
+            setProgress(30);
+            searchTopic = await extractTopicWithGemini(paragraphs);
+
+            originalArticleSource = {
+                id: 'origin', type: 'analisada', title,
+                snippet: paragraphs.substring(0, 300) + "...", url: input
+            };
+        } catch (e) {
+            showError("Link Bloqueado ou Inválido", "Não foi possível ler este link. Alguns sites bloqueiam a extração. Tente digitar o título da notícia.");
+            return;
+        }
+    }
+
+    // ── ETAPA 2: Busca de Notícias ──
+    const usingGNews = !!GNEWS_KEY;
+    logStep(usingGNews
+        ? `📰 Buscando notícias reais via GNews: "${searchTopic}"...`
+        : `🔍 Buscando fontes via Wikipedia: "${searchTopic}"...`);
+    setProgress(50);
+
+    let gnewsArticles = null;
+    let wikiResults = [];
+    let sourceMode = 'wiki';
+
+    if (usingGNews) {
+        gnewsArticles = await fetchGNews(searchTopic);
+        if (gnewsArticles && gnewsArticles.length > 0) {
+            sourceMode = 'gnews';
+        } else {
+            // fallback Wikipedia
+            gnewsArticles = null;
+            wikiResults = await fetchWikipedia(searchTopic).catch(() => []);
+        }
+    } else {
+        wikiResults = await fetchWikipedia(searchTopic).catch(() => []);
+    }
+
+    const hasData = (gnewsArticles && gnewsArticles.length > 0) || wikiResults.length > 0 || originalArticleSource;
+    if (!hasData) {
+        showError("Nenhum resultado", "O termo pesquisado não gerou dados suficientes. Tente um tema mais abrangente.");
+        return;
+    }
+
+    // ── ETAPA 3: Gemini Analisa ──
+    let snippetsForAI = [];
+    if (originalArticleSource) snippetsForAI.push(originalArticleSource.snippet);
+
+    if (sourceMode === 'gnews') {
+        gnewsArticles.forEach(a => snippetsForAI.push((a.description || a.title || '').substring(0, 400)));
+    } else {
+        wikiResults.forEach(w => snippetsForAI.push(stripHtml(w.snippet)));
+    }
+
+    logStep("Submetendo à IA Gemini para análise...");
+    setProgress(75);
+
+    let geminiResult = null;
+    try {
+        geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
+    } catch (err) {
+        showError("Falha na IA", "Não foi possível processar com o Gemini. Verifique se sua API Key é válida e não tem restrições de uso.");
+        return;
+    }
+
+    logStep("Construindo relatório...", 'done');
+    setProgress(100);
+
+    setTimeout(() => renderResults(searchTopic, { gnewsArticles, wikiResults, sourceMode }, geminiResult, originalArticleSource), 500);
+}
+
+function showError(title, desc) {
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorDesc').textContent = desc;
+    showView('error');
+}
+
+// ══════════════════════════════════════════════════════════
+// 🖼️ RENDERIZAÇÃO DOS RESULTADOS
+// ══════════════════════════════════════════════════════════
+function renderResults(searchTopic, newsData, ai, originalSource) {
+    const { gnewsArticles, wikiResults, sourceMode } = newsData;
+    const base = new Date();
+    const sources = [];
+
+    if (originalSource) {
+        const d = new Date(base); d.setDate(d.getDate() - 10);
+        sources.push({ ...originalSource, dateObj: d, date: d.toISOString().split('T')[0],
+            text: originalSource.snippet, confidence: 100 - ai.biasIntensity, isOriginalLink: true });
+    }
+
+    if (sourceMode === 'gnews' && gnewsArticles) {
+        gnewsArticles.forEach((art, i) => {
+            const pubDate = art.publishedAt ? new Date(art.publishedAt) : new Date(base.getTime() - (i + 1) * 86400000);
+            let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
+            if (conf < 20) conf = 20;
+
+            // Classifica tipo baseado no domínio da fonte
+            let type = 'imprensa';
+            const src = (art.source?.name || '').toLowerCase();
+            if (src.includes('gov') || src.includes('oficial')) type = 'oficial';
+            else if (src.includes('fatos') || src.includes('lupa') || src.includes('checagem')) type = 'checagem';
+            else if (i % 3 === 0) type = 'gnews';
+
+            sources.push({
+                id: `gnews-${i}`, type, isOriginalLink: false,
+                title: art.title || 'Sem título',
+                dateObj: pubDate, date: pubDate.toISOString().split('T')[0],
+                text: (art.description || 'Sem descrição disponível.'),
+                confidence: conf,
+                url: art.url || '#',
+                source: art.source?.name || 'GNews'
+            });
+        });
+    } else {
+        wikiResults.forEach((item, i) => {
+            let type = i % 2 === 0 ? 'oficial' : 'imprensa';
+            if (i === 1) type = 'checagem';
+            if (ai.biasIntensity > 50 && i > 3) type = 'blog';
+            let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
+            if (conf < 20) conf = 20;
+            const d = new Date(base); d.setDate(d.getDate() - (i + 1));
+            sources.push({
+                id: item.pageid, type, isOriginalLink: false,
+                title: `Wikipedia: ${item.title}`,
+                dateObj: d, date: d.toISOString().split('T')[0],
+                text: stripHtml(item.snippet) + '...',
+                confidence: conf, url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
+                source: 'Wikipedia'
+            });
+        });
+    }
+
+    sources.sort((a, b) => a.dateObj - b.dateObj);
+
+    // ── Veredito ──
+    let diversityPct = 100 - (ai.duplicateCount * 15);
+    if (ai.echoChamberDetected) diversityPct -= 20;
+    diversityPct = Math.max(0, Math.min(100, diversityPct));
+
+    let verdictClass, verdictTitle, verdictDesc;
+    if (ai.botReplicationDetected || ai.biasLevel === 'Alto' || ai.duplicateCount > 2) {
+        verdictClass = 'danger'; verdictTitle = 'SUSPEITO';
+        verdictDesc = 'A IA detectou padrão de bot, replicação artificial ou alto nível de viés emocional de manipulação.';
+    } else if (ai.echoChamberDetected || ai.biasLevel === 'Médio') {
+        verdictClass = 'warn'; verdictTitle = 'ATENÇÃO';
+        verdictDesc = 'Informação com divergências ou câmara de eco detectada. Verifique em fontes independentes.';
+    } else {
+        verdictClass = 'safe'; verdictTitle = 'CONFIÁVEL';
+        verdictDesc = 'A IA não identificou padrões de fake news, bots ou vieses significativos nesta informação.';
+    }
+
+    const orbIcons = {
+        safe: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+        warn: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+        danger: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    };
+
+    document.getElementById('verdictCard').className = `verdict-card ${verdictClass}`;
+    document.getElementById('verdictOrb').innerHTML = orbIcons[verdictClass];
+    document.getElementById('verdictTag').textContent = verdictTitle;
+    document.getElementById('verdictLabel').textContent = verdictTitle;
+    document.getElementById('verdictDesc').textContent = verdictDesc;
+    document.getElementById('hashId').textContent = 'HASH: ' + randomHash();
+
+    // ── Badge de fonte ──
+    const sourcesBadgeEl = document.getElementById('sourcesBadge');
+    if (sourcesBadgeEl) {
+        sourcesBadgeEl.textContent = sourceMode === 'gnews' ? '📰 GNews API' : '📖 Wikipedia';
+        sourcesBadgeEl.style.color = sourceMode === 'gnews' ? 'var(--green)' : 'var(--accent)';
+    }
+
+    // ── Métricas ──
+    document.getElementById('metricSources').textContent = sources.length;
+    document.getElementById('metricDiversity').textContent = diversityPct + '%';
+    document.getElementById('metricDiversitySub').textContent = diversityPct > 60 ? 'Múltiplos grupos' : 'Consenso frágil';
+    document.getElementById('metricDuplicates').textContent = ai.duplicateCount || 0;
+    document.getElementById('metricBias').textContent = ai.biasLevel || '—';
+    document.getElementById('metricBiasSub').textContent = (ai.biasIntensity || 0) + '% carga emocional';
+
+    // ── Diagnóstico ──
+    const echoIcon = document.getElementById('echoIcon');
+    if (ai.echoChamberDetected) {
+        echoIcon.style.cssText = 'background:var(--yellow-dim);color:var(--yellow);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('echoStatus').textContent = 'Câmara de eco detectada';
+        document.getElementById('echoStatus').style.color = 'var(--yellow)';
+    } else {
+        echoIcon.style.cssText = 'background:var(--green-dim);color:var(--green);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('echoStatus').textContent = 'Consenso orgânico confirmado';
+        document.getElementById('echoStatus').style.color = 'var(--green)';
+    }
+    const botIcon = document.getElementById('botIcon');
+    if (ai.botReplicationDetected) {
+        botIcon.style.cssText = 'background:var(--red-dim);color:var(--red);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('botStatus').textContent = 'Replicação artificial detectada';
+        document.getElementById('botStatus').style.color = 'var(--red)';
+    } else {
+        botIcon.style.cssText = 'background:var(--accent-dim);color:var(--accent);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('botStatus').textContent = 'Nenhum padrão de bot detectado';
+    }
+
+    const concEl = document.getElementById('aiConclusionText');
+    concEl.innerHTML = `<strong>RESUMO DA IA:</strong> ${ai.aiConclusion || "Análise completada sem alertas."}`;
+    concEl.parentElement.style.borderColor = ai.biasLevel === 'Alto' || ai.botReplicationDetected ? 'var(--red)'
+        : ai.biasLevel === 'Médio' ? 'var(--yellow)' : 'var(--accent-mid)';
+
+    // ── Lista de Fontes ──
+    const srcList = document.getElementById('sourcesList');
+    srcList.innerHTML = '';
+    sources.forEach(src => {
+        const barColor = src.confidence >= 70 ? 'var(--green)' : src.confidence >= 40 ? 'var(--yellow)' : 'var(--red)';
+        const typeLabel = CATEGORIES[src.type] || 'Fonte';
+        const sourceName = src.source ? `<span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);margin-left:6px;">· ${src.source}</span>` : '';
+        srcList.insertAdjacentHTML('beforeend', `
+            <div class="source-card ${src.isOriginalLink ? 'origin-card' : ''}">
+                <div class="source-head">
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span class="type-badge type-${src.type}">${typeLabel}</span>${sourceName}
+                    </div>
+                    <span class="source-date">${src.date}</span>
+                </div>
+                <div class="source-title" ${src.isOriginalLink ? 'style="color:var(--accent)"' : ''}>${src.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : src.title}</div>
+                <div class="source-excerpt">${src.text}</div>
+                <div class="source-foot">
+                    <div class="conf-bar-wrap">
+                        <div class="conf-track">
+                            <div class="conf-fill" style="width:${src.confidence}%;background:${barColor}"></div>
+                        </div>
+                        <span class="conf-label">Confiança ${Math.round(src.confidence)}%</span>
+                    </div>
+                    <a href="${src.url}" target="_blank" rel="noopener" class="btn-source-link" title="Abrir fonte original">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+            </div>
+        `);
+    });
+
+    // ── Timeline ──
+    const tlContainer = document.getElementById('timelineContainer');
+    tlContainer.innerHTML = '';
+    sources.forEach((src, idx) => {
+        const typeLabel = CATEGORIES[src.type] || 'Web';
+        let iconClass = 'tl-icon';
+        let iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+        if (src.isOriginalLink) { iconClass += ' analyzed'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`; }
+        else if (src.type === 'oficial' || src.type === 'checagem') { iconClass += ' safe'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`; }
+        else if (idx === 0 && (src.type === 'blog' || ai.biasLevel === 'Alto')) { iconClass += ' origin'; }
+
+        tlContainer.insertAdjacentHTML('beforeend', `
+            <div class="tl-node">
+                <div class="tl-date">${src.date}</div>
+                <div class="${iconClass}">${iconSvg}</div>
+                <span class="tl-badge type-${src.type}">${typeLabel}</span>
+                <div class="tl-title">${src.isOriginalLink ? 'Seu link' : (src.title || '').replace('Wikipedia: ', '').replace('REFERÊNCIA: ', '').substring(0, 40)}</div>
+            </div>
+        `);
+    });
+
+    // ── Sugestões ──
+    renderSuggestions(searchTopic, ai, verdictClass);
+    showView('results');
+}
+
+// ══════════════════════════════════════════════════════════
+// 💡 SUGESTÕES INTELIGENTES
+// ══════════════════════════════════════════════════════════
+function renderSuggestions(topic, ai, verdictClass) {
+    const suggestions = [
+        { icon: '🔎', title: 'Busque no Google Fact Check', desc: `Pesquise "${topic}" no Google com filtro "fact check" para encontrar verificações profissionais.`, bg: 'var(--accent-dim)' },
+        { icon: '📚', title: 'Agências de Checagem Brasileiras', desc: 'Verifique no Aos Fatos, Agência Lupa, E-farsas ou AFP Checamos — todas especializadas em desinformação no Brasil.', bg: 'var(--green-dim)' },
+    ];
+    if (ai.echoChamberDetected) suggestions.push({ icon: '🌐', title: 'Busque Fontes Diversas', desc: 'Câmara de eco detectada. Procure o mesmo tema em veículos de espectros políticos diferentes.', bg: 'var(--yellow-dim)' });
+    if (ai.biasLevel === 'Alto' || ai.biasLevel === 'Médio') suggestions.push({ icon: '🧪', title: 'Analise a Linguagem Emocional', desc: 'Textos com alto viés usam medo, raiva ou urgência. Pergunte-se: essa notícia quer me informar ou me emocionar?', bg: 'var(--red-dim)' });
+    if (ai.botReplicationDetected) suggestions.push({ icon: '🤖', title: 'Verifique a Origem da Publicação', desc: 'Padrão de bot detectado. Confira se os sites têm CNPJ, equipe editorial e histórico de publicações.', bg: 'var(--red-dim)' });
+    suggestions.push({ icon: '🕵️', title: 'Rastreie a Imagem Original', desc: 'Se houver fotos, use Google Imagens ou TinEye para ver onde a imagem apareceu pela primeira vez.', bg: 'var(--accent-dim)' });
+    if (verdictClass === 'safe') suggestions.push({ icon: '✅', title: 'Compartilhe com Responsabilidade', desc: 'Mesmo informações confiáveis podem ser descontextualizadas. Inclua a fonte e data ao compartilhar.', bg: 'var(--green-dim)' });
+
+    const list = document.getElementById('suggestionList');
+    list.innerHTML = '';
+    suggestions.forEach(s => {
+        list.insertAdjacentHTML('beforeend', `
+            <div class="suggestion-item">
+                <div class="sug-icon" style="background:${s.bg}">${s.icon}</div>
+                <div class="sug-text">
+                    <div class="sug-title">${s.title}</div>
+                    <div class="sug-desc">${s.desc}</div>
+                </div>
+            </div>
+        `);
+    });
+}
+</script>
+</body>
+</html>
