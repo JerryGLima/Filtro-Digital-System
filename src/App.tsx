@@ -43,7 +43,7 @@ interface AnalysisResult {
   duplicateCount: number;
   biasScore: number;
   echoChamber: boolean;
-  conclussion: string;
+  conclusion: string;
 }
 
 const EMOTIONAL_WORDS = ["absurdo", "grave", "urgente", "escândalo", "chocante", "terrível", "revoltante", "inacreditável"];
@@ -218,11 +218,11 @@ export default function App() {
         status = 'YELLOW';
       }
 
-      let conclussion = "A análise mostra um ecossistema de informações equilibrado e fontes diversificadas.";
+      let conclusion = "A análise mostra um ecossistema de informações equilibrado e fontes diversificadas.";
       if (status === 'RED') {
-        conclussion = "Alta taxa de duplicação detectada e baixo índice de diversidade. Possível campanha de desinformação ou câmara de eco.";
+        conclusion = "Alta taxa de duplicação detectada e baixo índice de diversidade. Possível campanha de desinformação ou câmara de eco.";
       } else if (status === 'YELLOW') {
-        conclussion = "Atenção: Identificada moderada replicação de conteúdo e presença de viés emocional em fontes secundárias.";
+        conclusion = "Atenção: Identificada moderada replicação de conteúdo e presença de viés emocional em fontes secundárias.";
       }
 
       setAnalysisResult({
@@ -232,7 +232,7 @@ export default function App() {
         duplicateCount: duplicates,
         biasScore: bias,
         echoChamber,
-        conclussion
+        conclusion
       });
       setIsAnalyzing(false);
     }, 2500);
@@ -266,7 +266,7 @@ export default function App() {
               <ShieldCheck size={22} />
             </div>
             <h1 className="font-black text-xl tracking-tighter uppercase">
-              Filtro Digital <span className="text-slate-500 font-medium">1.0</span>
+              VerifEye <span className="text-slate-500 font-medium">OS 1.0</span>
             </h1>
           </div>
           <nav className="hidden md:flex gap-8 items-center">
@@ -402,7 +402,7 @@ export default function App() {
                     </h3>
                   </div>
                   <p className="text-slate-400 text-lg leading-relaxed max-w-2xl font-medium">
-                    {analysisResult.conclussion}
+                    {analysisResult.conclusion}
                   </p>
                 </div>
                 
@@ -572,7 +572,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-2">
             <ShieldCheck size={18} className="text-emerald-500" />
-            <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">Abril 2026 - Johnathan</p>
+            <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest">© 2024 VerifEye Analytics. Terminal Seguro.</p>
           </div>
           <div className="flex gap-10">
             <a href="#" className="text-slate-600 hover:text-emerald-500 text-[10px] font-black uppercase tracking-widest transition-colors">Termos de Uso</a>
