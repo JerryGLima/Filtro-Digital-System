@@ -192,49 +192,64 @@ export default function App() {
 
     // Run analysis logic after "fetching"
     setTimeout(() => {
-      const bias = analyzeBias(inputText);
-      
-      // Calculate duplication in our simulated source set
-      let duplicates = 0;
-      for (let i = 0; i < SIMULATED_SOURCES.length; i++) {
-        for (let j = i + 1; j < SIMULATED_SOURCES.length; j++) {
-          if (calculateSimilarity(SIMULATED_SOURCES[i].content, SIMULATED_SOURCES[j].content) > 0.8) {
-            duplicates++;
+      try {
+        const bias = analyzeBias(inputText);
+        
+        // Calculate duplication in our simulated source set
+        let duplicates = 0;
+        for (let i = 0; i < SIMULATED_SOURCES.length; i++) {
+          for (let j = i + 1; j < SIMULATED_SOURCES.length; j++) {
+            if (calculateSimilarity(SIMULATED_SOURCES[i].content, SIMULATED_SOURCES[j].content) > 0.8) {
+              duplicates++;
+            }
           }
         }
+
+        const uniqueTypes = new Set(SIMULATED_SOURCES.map(s => s.type)).size;
+        const diversity = uniqueTypes / 4; // Max 4 types
+
+        // Heurestic for Echo Chamber
+        const echoChamber = duplicates >= 2 || diversity < 0.5;
+
+        // Status Logic
+        let status: 'GREEN' | 'YELLOW' | 'RED' = 'GREEN';
+        if (duplicates > 3 || (diversity < 0.5 && bias > 0.6)) {
+          status = 'RED';
+        } else if (bias > 0.4 || duplicates > 1 || diversity < 0.75) {
+          status = 'YELLOW';
+        }
+
+        let conclusion = "A análise mostra um ecossistema de informações equilibrado e fontes diversificadas.";
+        if (status === 'RED') {
+          conclusion = "Alta taxa de duplicação detectada e baixo índice de diversidade. Possível campanha de desinformação ou câmara de eco.";
+        } else if (status === 'YELLOW') {
+          conclusion = "Atenção: Identificada moderada replicação de conteúdo e presença de viés emocional em fontes secundárias.";
+        }
+
+        setAnalysisResult({
+          status,
+          sourceCount: SIMULATED_SOURCES.length,
+          diversityScore: diversity,
+          duplicateCount: duplicates,
+          biasScore: bias,
+          echoChamber,
+          conclusion
+        });
+      } catch (error) {
+        console.error("Erro durante a análise:", error);
+        // Fallback result to prevent black screen
+        setAnalysisResult({
+          status: 'YELLOW',
+          sourceCount: SIMULATED_SOURCES.length,
+          diversityScore: 0.5,
+          duplicateCount: 0,
+          biasScore: 0,
+          echoChamber: false,
+          conclusion: "Ocorreu um erro inesperado durante a análise. Por favor, tente novamente."
+        });
+      } finally {
+        setIsAnalyzing(false);
       }
-
-      const uniqueTypes = new Set(SIMULATED_SOURCES.map(s => s.type)).size;
-      const diversity = uniqueTypes / 4; // Max 4 types
-
-      // Heurestic for Echo Chamber
-      const echoChamber = duplicates >= 2 || diversity < 0.5;
-
-      // Status Logic
-      let status: 'GREEN' | 'YELLOW' | 'RED' = 'GREEN';
-      if (duplicates > 3 || (diversity < 0.5 && bias > 0.6)) {
-        status = 'RED';
-      } else if (bias > 0.4 || duplicates > 1 || diversity < 0.75) {
-        status = 'YELLOW';
-      }
-
-      let conclusion = "A análise mostra um ecossistema de informações equilibrado e fontes diversificadas.";
-      if (status === 'RED') {
-        conclusion = "Alta taxa de duplicação detectada e baixo índice de diversidade. Possível campanha de desinformação ou câmara de eco.";
-      } else if (status === 'YELLOW') {
-        conclusion = "Atenção: Identificada moderada replicação de conteúdo e presença de viés emocional em fontes secundárias.";
-      }
-
-      setAnalysisResult({
-        status,
-        sourceCount: SIMULATED_SOURCES.length,
-        diversityScore: diversity,
-        duplicateCount: duplicates,
-        biasScore: bias,
-        echoChamber,
-        conclusion
-      });
-      setIsAnalyzing(false);
     }, 2500);
   };
 
@@ -380,7 +395,7 @@ export default function App() {
                       transition={{ duration: 4, repeat: Infinity }}
                       className={`absolute inset-0 rounded-full bg-${getStatusColor(analysisResult.status)}-500/10 blur-xl`} 
                     />
-                    <div className={`w-28 h-28 rounded-full bg-${getStatusColor(analysisResult.status)}-500 flex items-center justify-center text-slate-950 shadow-[0_0_50px_rgba(var(--status-color),0.4)] z-10 animate-pulse`}>
+                    <div className={`w-28 h-28 rounded-full bg-${getStatusColor(analysisResult.status)}-500 flex items-center justify-center text-slate-950 shadow-2xl shadow-${getStatusColor(analysisResult.status)}-500/40 z-10 animate-pulse`}>
                       {analysisResult.status === 'GREEN' && <ShieldCheck size={52} strokeWidth={2.5} />}
                       {analysisResult.status === 'YELLOW' && <AlertTriangle size={52} strokeWidth={2.5} />}
                       {analysisResult.status === 'RED' && <AlertCircle size={52} strokeWidth={2.5} />}
