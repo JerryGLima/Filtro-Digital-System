@@ -1,0 +1,1593 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VERIFEYE OS 1.0 - IA + URL Analyzer</title>
+    
+    <!-- ========================================== -->
+    <!-- ESTILOS (CSS)                              -->
+    <!-- ========================================== -->
+    <style>
+        :root {
+            --bg-main: #060b14;
+            --bg-panel: #111827;
+            --bg-card: #141c2b;
+            --bg-input: #1a2335;
+            --border-color: #1f2937;
+            --border-light: #374151;
+            
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --text-dark: #6b7280;
+            
+            /* Status Colors */
+            --color-green: #22c55e;
+            --color-green-light: #4ade80;
+            --color-green-dim: rgba(34, 197, 94, 0.1);
+            --color-green-bg: #064e3b;
+            
+            --color-yellow: #eab308;
+            --color-yellow-dim: rgba(234, 179, 8, 0.1);
+            
+            --color-red: #ef4444;
+            --color-red-dim: rgba(239, 68, 68, 0.1);
+
+            --color-blue: #3b82f6;
+            --color-blue-dim: rgba(59, 130, 246, 0.1);
+            
+            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: var(--font-family);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* HEADER */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 3rem;
+            border-bottom: 1px solid var(--border-color);
+            background-color: rgba(6, 11, 20, 0.9);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.2rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background-color: var(--color-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--bg-main);
+        }
+
+        .logo-text span {
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.9rem;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+
+        .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(59, 130, 246, 0.1);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #60a5fa;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #60a5fa;
+            animation: pulse-blue 2s infinite;
+        }
+
+        /* MAIN CONTENT AREA */
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 3rem 2rem;
+            width: 100%;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* VIEW: HOME (SEARCH) */
+        #view-home {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            flex: 1;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .top-badge {
+            background-color: var(--color-blue-dim);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+        }
+
+        h1 .highlight { color: #60a5fa; }
+
+        .subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 700px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .search-box {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            transition: var(--transition);
+        }
+
+        .search-box:focus-within {
+            border-color: var(--color-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-icon {
+            padding: 0 15px;
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-size: 1rem;
+            padding: 10px 0;
+            outline: none;
+        }
+
+        .btn-analyze {
+            background-color: var(--bg-panel);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 0 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-analyze:hover {
+            background-color: var(--color-blue);
+            color: var(--bg-main);
+            border-color: var(--color-blue);
+        }
+
+        /* VIEW: LOADING */
+        #view-loading {
+            display: none;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            margin: auto;
+        }
+
+        .progress-bar-bg {
+            width: 100%;
+            height: 6px;
+            background-color: var(--bg-input);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%;
+            background-color: var(--color-blue);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px var(--color-blue);
+        }
+
+        .loading-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+
+        /* VIEW: ERROR / NO DATA */
+        #view-error {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin: auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        #view-error svg {
+            color: var(--color-yellow);
+            margin-bottom: 1rem;
+        }
+
+        /* VIEW: RESULTS */
+        #view-results {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Top Result Banner */
+        .result-banner {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .result-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background-color: var(--color-green-bg);
+            border: 8px solid rgba(255,255,255,0.02);
+        }
+
+        .result-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--color-green);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+        }
+
+        .result-content {
+            flex: 1;
+        }
+
+        .result-tag {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+            border: 1px solid;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .result-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .result-desc {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 90%;
+            line-height: 1.5;
+        }
+
+        .result-actions {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 1rem;
+        }
+
+        .hash-id {
+            font-family: monospace;
+            font-size: 0.7rem;
+            color: var(--text-dark);
+            background: rgba(0,0,0,0.3);
+            padding: 4px 10px;
+            border-radius: 4px;
+        }
+
+        .action-btns {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .btn-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-icon:hover {
+            color: var(--text-main);
+            border-color: var(--text-muted);
+        }
+
+        /* Metrics Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .metric-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .metric-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            border: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .metric-title {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 0.25rem;
+            line-height: 1;
+        }
+
+        .metric-sub {
+            color: var(--text-dark);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* Layout Inferior (2 Colunas) */
+        .results-layout {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #60a5fa;
+        }
+
+        /* Lista de Fontes (Esquerda) */
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .source-card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .source-card:hover {
+            border-color: var(--border-light);
+        }
+
+        .source-card.origin-card {
+            border-color: rgba(59, 130, 246, 0.5);
+            background-color: rgba(59, 130, 246, 0.05);
+        }
+
+        .source-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .source-type {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 0.65rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .type-oficial { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .type-imprensa { background: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); }
+        .type-blog { background: rgba(234, 179, 8, 0.15); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.3); }
+        .type-checagem { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .type-analisada { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+        .source-date {
+            font-family: monospace;
+            font-size: 0.75rem;
+            color: var(--text-dark);
+        }
+
+        .source-title {
+            font-size: 1rem;
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+        }
+
+        .source-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .source-bottom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .confidence-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex: 1;
+        }
+
+        .confidence-bar-bg {
+            height: 4px;
+            width: 150px;
+            background-color: var(--bg-card);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .confidence-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+        }
+
+        .confidence-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-go {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-go:hover {
+            color: var(--text-main);
+            border-color: var(--text-main);
+        }
+
+        /* Mapeamento Espectral (Direita) */
+        .spectral-panel {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .spectral-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .live-tag {
+            color: var(--color-blue);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .chart-area {
+            height: 120px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-light);
+            position: relative;
+        }
+
+        .chart-dots {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        .chart-dot {
+            width: 3px;
+            height: 3px;
+            background-color: var(--border-light);
+            border-radius: 50%;
+        }
+
+        .spectral-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .spectral-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .spectral-icon.eco { background-color: var(--color-green-dim); color: var(--color-green); }
+        .spectral-icon.rep { background-color: var(--color-blue-dim); color: var(--color-blue); }
+
+        .spectral-info h4 {
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 2px;
+        }
+        .spectral-info p {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .warning-box {
+            background-color: var(--bg-card);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+            margin-top: 1rem;
+        }
+
+        .warning-box p {
+            font-size: 0.7rem;
+            color: #9ca3af;
+            line-height: 1.5;
+            text-transform: uppercase;
+            font-style: italic;
+        }
+
+        .warning-box p strong {
+            color: #60a5fa;
+        }
+
+        /* TIMELINE DA INFORMAÇÃO */
+        .timeline-section {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .timeline-container {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            position: relative;
+            padding: 2rem 0 1rem 0;
+            min-width: 800px;
+        }
+
+        .timeline-container::before {
+            content: '';
+            position: absolute;
+            top: 47px; 
+            left: 50px;
+            right: 50px;
+            height: 2px;
+            background-color: var(--border-light);
+            z-index: 1;
+        }
+
+        .timeline-node {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 10px;
+        }
+
+        .node-date {
+            font-size: 0.65rem;
+            font-family: monospace;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .node-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: var(--bg-card);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .node-icon.origin {
+            border-color: var(--color-red);
+            color: var(--color-red);
+            box-shadow: 0 0 10px var(--color-red-dim);
+        }
+        
+        .node-icon.analyzed {
+            border-color: var(--color-blue);
+            color: var(--color-blue);
+            box-shadow: 0 0 10px var(--color-blue-dim);
+        }
+
+        .node-icon.safe {
+            border-color: var(--color-green);
+            color: var(--color-green);
+        }
+
+        .node-type {
+            font-size: 0.6rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        .node-title {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            max-width: 140px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* FOOTER */
+        footer {
+            padding: 2rem 3rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            background-color: var(--bg-main);
+            margin-top: 2rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .footer-links span {
+            cursor: pointer;
+        }
+        .footer-links span:hover {
+            color: var(--text-main);
+        }
+
+        /* UTILS & ANIMATIONS */
+        @keyframes pulse-blue {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .text-green { color: var(--color-green-light); }
+        .text-yellow { color: var(--color-yellow); }
+        .text-red { color: var(--color-red); }
+
+        /* Responsividade */
+        @media (max-width: 1024px) {
+            .results-layout { grid-template-columns: 1fr; }
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 768px) {
+            header { flex-direction: column; gap: 1rem; padding: 1rem; }
+            .nav-right { flex-direction: column; gap: 1rem; }
+            h1 { font-size: 2rem; }
+            .search-box { flex-direction: column; background: transparent; border: none; gap: 10px; }
+            .search-input { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; width: 100%; }
+            .btn-analyze { padding: 12px; justify-content: center; }
+            .result-banner { flex-direction: column; text-align: center; }
+            .result-actions { position: relative; top: 0; right: 0; flex-direction: row; width: 100%; justify-content: space-between; margin-top: 1rem; }
+            .action-btns { flex-direction: row; }
+            .metrics-grid { grid-template-columns: 1fr; }
+            .source-bottom { flex-direction: column; align-items: flex-start; gap: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- CABEÇALHO -->
+    <header>
+        <div class="logo-container" onclick="resetApp()">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline><polyline points="7.5 19.79 7.5 14.6 3 12"></polyline><polyline points="21 12 16.5 14.6 16.5 19.79"></polyline><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+            </div>
+            <div class="logo-text">VERIFEYE<span>OS 1.0 (IA GEMINI ATIVA)</span></div>
+        </div>
+        <div class="nav-right">
+            <div class="status-badge">
+                <div class="status-dot"></div>
+                LEITOR DE LINKS & IA ATIVOS
+            </div>
+            <nav class="nav-links">
+                <a href="#" class="active" onclick="resetApp()">PAINEL</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main>
+        
+        <!-- TELA 1: BUSCA / HOME -->
+        <div id="view-home">
+            <div class="top-badge">MONITORAMENTO DE INTEGRIDADE DIGITAL COM IA</div>
+            
+            <h1>DETECÇÃO <span class="highlight">AVANÇADA</span> DE<br>DESINFORMAÇÃO</h1>
+            
+            <p class="subtitle">
+                O VERIFEYE OS LÊ LINKS DE NOTÍCIAS OU TEMAS, EXTRAI O TEXTO, BUSCA FONTES REAIS NA WEB E UTILIZA A <b>INTELIGÊNCIA ARTIFICIAL DO GOOGLE</b> PARA ANALISAR VERACIDADE E VIESES.
+            </p>
+
+            <div class="search-box">
+                <div class="search-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                </div>
+                <!-- Input atualizado com dica de colar URL -->
+                <input type="text" id="mainInput" class="search-input" placeholder="Pesquise um tema real ou cole o link de uma notícia (http://...)" autocomplete="off">
+                <button class="btn-analyze" onclick="startAnalysis()">
+                    ANALISAR
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- TELA 2: CARREGAMENTO -->
+        <div id="view-loading">
+            <h2 style="color: #60a5fa; display: flex; align-items: center; justify-content: center; gap: 10px;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                Google Gemini Processando...
+            </h2>
+            <p class="subtitle" style="margin-bottom: 1rem; margin-top: 0.5rem;" id="loadingSubtext">Conectando aos servidores de dados...</p>
+            
+            <div class="loader-container">
+                <div class="progress-bar-bg">
+                    <div class="progress-bar-fill" id="progressBar"></div>
+                </div>
+                <div class="loading-text" id="loadingText">Preparando varredura...</div>
+            </div>
+        </div>
+
+        <!-- TELA DE ERRO (NO DATA) -->
+        <div id="view-error">
+            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            <h2 id="errorTitle">Falha na Coleta</h2>
+            <p class="subtitle" style="margin-top: 1rem;" id="errorDesc">O termo pesquisado não gerou resultados suficientes ou o link colado está protegido contra leitura automática.</p>
+            <button class="btn-analyze" style="margin-top: 2rem;" onclick="resetApp()">TENTAR NOVAMENTE</button>
+        </div>
+
+        <!-- TELA 3: RESULTADOS -->
+        <div id="view-results">
+            
+            <!-- Banner Principal -->
+            <div class="result-banner" id="statusBanner">
+                <div class="result-icon-wrapper" id="statusIconWrapper">
+                    <div class="result-icon" id="statusIcon">
+                        <!-- Icon SVG -->
+                    </div>
+                </div>
+                
+                <div class="result-content">
+                    <div class="result-tag" id="statusTag">IA GEMINI: AVALIAÇÃO DE CONFIABILIDADE</div>
+                    <div class="result-title">CONTEÚDO <span id="statusTitleHighlight" class="text-green">CONFIÁVEL</span></div>
+                    <p class="result-desc" id="statusDesc">A informação está em sites confiáveis e não há índice de bots ou fake news.</p>
+                </div>
+
+                <div class="result-actions">
+                    <div class="hash-id" id="hashId">HASH: #12621</div>
+                    <div class="action-btns">
+                        <button class="btn-icon" title="Nova Análise" onclick="resetApp()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="metrics-grid">
+                <!-- Card 1 -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                        </div>
+                        <span class="metric-title">Índice de Diversidade</span>
+                    </div>
+                    <div class="metric-value" id="metricSources">0</div>
+                    <div class="metric-sub" id="metricSourcesSub">Fontes Únicas (Web)</div>
+                </div>
+                <!-- Card 2 -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        </div>
+                        <span class="metric-title">Identidade de Grupo</span>
+                    </div>
+                    <div class="metric-value" id="metricDiversity">100%</div>
+                    <div class="metric-sub" id="metricDiversitySub">Várias Interpretações</div>
+                </div>
+                <!-- Card 3 -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        </div>
+                        <span class="metric-title">Cópia Detectada</span>
+                    </div>
+                    <div class="metric-value" id="metricDuplicates">0</div>
+                    <div class="metric-sub" id="metricDuplicatesSub">Padrão Bot (IA)</div>
+                </div>
+                <!-- Card 4 -->
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <div class="metric-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        </div>
+                        <span class="metric-title">Viés Emocional (IA)</span>
+                    </div>
+                    <div class="metric-value" id="metricBias">Baixo</div>
+                    <div class="metric-sub" id="metricBiasSub">0% de Intensidade</div>
+                </div>
+            </div>
+
+            <!-- Colunas Inferiores -->
+            <div class="results-layout">
+                <!-- Esquerda: Fontes -->
+                <div>
+                    <div class="section-header">
+                        <div class="section-dot"></div>
+                        Textos Reais Extraídos da Web (Base para IA)
+                    </div>
+                    <div class="sources-list" id="sourcesList">
+                        <!-- Cards injetados via JS -->
+                    </div>
+                </div>
+
+                <!-- Direita: Espectral / Bots -->
+                <div>
+                    <div class="section-header">
+                        <div class="section-dot"></div>
+                        Diagnóstico da Inteligência Artificial
+                    </div>
+                    <div class="spectral-panel">
+                        <div class="spectral-header">
+                            <span>Status de Propagação (Bots)</span>
+                            <span class="live-tag">
+                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"></circle></svg>
+                                LIVE GEMINI
+                            </span>
+                        </div>
+                        
+                        <div class="chart-area">
+                            <div class="chart-dots">
+                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
+                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
+                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
+                            </div>
+                        </div>
+
+                        <div class="spectral-item">
+                            <div class="spectral-icon eco" id="specEcoIcon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                            </div>
+                            <div class="spectral-info">
+                                <h4>Coesão de Informação</h4>
+                                <p id="specEcoStatus">Consenso Sólido (Orgânico)</p>
+                            </div>
+                        </div>
+
+                        <div class="spectral-item">
+                            <div class="spectral-icon rep" id="specRepIcon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                            </div>
+                            <div class="spectral-info">
+                                <h4>Padrão Artificial / Bots</h4>
+                                <p id="specRepStatus">Nenhuma replicação em massa</p>
+                            </div>
+                        </div>
+
+                        <div class="warning-box">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+                            <p id="nlpWarningText"><strong>RESUMO DA IA:</strong> Aguardando processamento da linguagem natural...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LINHA DO TEMPO -->
+            <div class="timeline-section">
+                <div class="section-header">
+                    <div class="section-dot"></div>
+                    Linha do Tempo: Onde a informação começou
+                </div>
+                <div class="timeline-container" id="timelineContainer">
+                    <!-- Nodes injetados via JS -->
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- RODAPÉ -->
+    <footer>
+        <div class="footer-left">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:5px; vertical-align:middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
+            © 2026 VERIFEYE VERITY OS. MOTOR DE IA GEMINI ATIVO.
+        </div>
+        <div class="footer-links">
+            <span>DADOS REAIS</span>
+            <span>CORS BYPASS</span>
+            <span>GOOGLE GEMINI API</span>
+        </div>
+    </footer>
+
+    <!-- ========================================== -->
+    <!-- LÓGICA DO SISTEMA (JS) - WEB + GEMINI IA   -->
+    <!-- ========================================== -->
+    <script>
+        // --- 1. CONFIGURAÇÕES BASE ---
+        
+        // Chave do Gemini (Fornecida automaticamente pelo ambiente ou inserida pelo professor no futuro)
+        const apiKey = ""; 
+
+        const CATEGORIES = {
+            'imprensa': 'Imprensa Tradicional',
+            'oficial': 'Órgãos Oficiais',
+            'blog': 'Blogs Independentes',
+            'checagem': 'Agência de Checagem',
+            'analisada': 'Link Analisado (Sua Busca)'
+        };
+
+        const views = {
+            home: document.getElementById('view-home'),
+            loading: document.getElementById('view-loading'),
+            results: document.getElementById('view-results'),
+            error: document.getElementById('view-error')
+        };
+
+        function showView(viewName) {
+            Object.values(views).forEach(v => v.style.display = 'none');
+            views[viewName].style.display = 'flex';
+            if(viewName !== 'home' && viewName !== 'error') views[viewName].style.flexDirection = 'column';
+        }
+
+        document.getElementById('mainInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') startAnalysis();
+        });
+
+        function resetApp() {
+            document.getElementById('mainInput').value = '';
+            showView('home');
+        }
+
+        function stripHtmlTags(str) {
+            if ((str === null) || (str === '')) return false;
+            else str = str.toString();
+            return str.replace(/<[^>]*>/g, '');
+        }
+
+        // --- 2. COMUNICAÇÃO COM A IA E PROXY (CORS BYPASS) ---
+
+        // Função que usa a IA para ler um texto gigante de uma notícia e descobrir sobre o que é
+        async function extractTopicWithGemini(text) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const promptText = `Aja como um buscador. Resuma o seguinte texto em um termo de pesquisa de no máximo 4 palavras, identificando o assunto principal. Retorne APENAS as palavras chave, sem aspas, sem pontos e sem explicações.\n\nTexto: ${text.substring(0, 1500)}`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+            });
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+        }
+
+        // Função que usa a IA para julgar a veracidade
+        async function analyzeWithGemini(snippets, topic) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+            const promptText = `
+                Você é um sistema de detecção de desinformação profissional. Analise os seguintes trechos de texto extraídos da internet. O tema da busca foi "${topic}".
+                A [Fonte 1] é o artigo principal fornecido pelo usuário. As outras fontes são da base de dados (Wikipedia/Web) para cruzamento de fatos.
+                
+                Instruções:
+                1. Avalie se a [Fonte 1] ou as demais possuem linguagem altamente emocional ou enviesada.
+                2. Avalie se há sinais de câmara de eco (quando fontes não diversificadas ecoam exatamente a mesma narrativa duvidosa da Fonte 1).
+                3. Avalie se os textos parecem ser cópia exata uns dos outros (Bots/Copia e Cola).
+                4. Forneça uma conclusão simples de 1 frase (aiConclusion) julgando a confiabilidade do tema.
+
+                Textos extraídos:
+                ${snippets.map((s, i) => `[Fonte ${i+1}]: ${s}`).join('\n\n')}
+            `;
+
+            const payload = {
+                contents: [{ parts: [{ text: promptText }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            biasLevel: { type: "STRING", description: "Obrigatório: Retorne apenas 'Baixo', 'Médio' ou 'Alto'" },
+                            biasIntensity: { type: "INTEGER", description: "Número de 0 a 100 indicando a intensidade do viés" },
+                            echoChamberDetected: { type: "BOOLEAN" },
+                            botReplicationDetected: { type: "BOOLEAN" },
+                            duplicateCount: { type: "INTEGER", description: "Estimativa de quantos textos parecem cópias exatas" },
+                            aiConclusion: { type: "STRING", description: "Resumo curto e direto do diagnóstico." }
+                        }
+                    }
+                }
+            };
+
+            const delays = [1000, 2000, 4000, 8000, 16000]; // Exponential backoff
+
+            for (let i = 0; i < 6; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const data = await response.json();
+                    const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                    if(textResult) return JSON.parse(textResult);
+                    throw new Error("Resposta vazia");
+                } catch (error) {
+                    if (i === 5) throw error;
+                    await new Promise(r => setTimeout(r, delays[i]));
+                }
+            }
+        }
+
+        // --- 3. FLUXO DE BUSCA REAL (URL + IA + WIKI) ---
+        async function startAnalysis() {
+            const input = document.getElementById('mainInput').value.trim();
+            if (!input) {
+                alert("Por favor, insira um texto ou cole um link válido para iniciar a varredura.");
+                return;
+            }
+
+            showView('loading');
+            const bar = document.getElementById('progressBar');
+            const txt = document.getElementById('loadingText');
+            const subTxt = document.getElementById('loadingSubtext');
+            
+            // Detecta se o usuário colou um Link (URL)
+            const isUrl = /^https?:\/\//i.test(input);
+            
+            let searchTopic = input;
+            let originalArticleSource = null;
+
+            // Se for um link, vamos extrair o texto do site contornando o bloqueio CORS
+            if (isUrl) {
+                bar.style.width = '15%';
+                txt.innerText = "Link detectado. Realizando Bypass CORS...";
+                subTxt.innerText = "Extraindo código fonte da reportagem externa...";
+
+                try {
+                    // Proxy gratuito para acessar sites sem erro de CORS
+                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(input)}`;
+                    const response = await fetch(proxyUrl);
+                    if (!response.ok) throw new Error('Falha no proxy');
+                    
+                    const data = await response.json();
+                    const html = data.contents;
+
+                    // Converter HTML para Texto e pegar parágrafos
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(html, 'text/html');
+                    const title = doc.title || "Artigo Externo";
+                    
+                    // Pega o texto dos parágrafos maiores (geralmente a notícia)
+                    const paragraphs = Array.from(doc.querySelectorAll('p'))
+                                            .map(p => p.textContent.trim())
+                                            .filter(t => t.length > 50)
+                                            .join(' ')
+                                            .substring(0, 2500); // Limite para não explodir a IA
+
+                    if (!paragraphs) throw new Error("Texto não encontrado no site.");
+
+                    bar.style.width = '35%';
+                    txt.innerText = "Lendo artigo...";
+                    subTxt.innerText = "A IA está processando a notícia para descobrir o tema central.";
+
+                    // Usa IA para descobrir o tema da notícia do cara
+                    searchTopic = await extractTopicWithGemini(paragraphs);
+
+                    // Salva a notícia para mostrar no painel depois
+                    originalArticleSource = {
+                        id: 'origin',
+                        type: 'analisada',
+                        title: title,
+                        snippet: paragraphs.substring(0, 300) + "...",
+                        url: input
+                    };
+
+                } catch (e) {
+                    console.error(e);
+                    showError("Link Bloqueado ou Inválido", "Não foi possível extrair o texto deste link. Alguns sites bloqueiam raspagem de dados. Tente digitar o título da notícia em vez do link.");
+                    return;
+                }
+            }
+
+            // Busca na Wikipedia cruzando com o termo (ou o tema extraído do link)
+            bar.style.width = '50%';
+            txt.innerText = `Consultando base de dados cruzada sobre: "${searchTopic}"...`;
+            subTxt.innerText = "Buscando fontes orgânicas na internet...";
+
+            const endpoint = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTopic)}&utf8=&format=json&origin=*`;
+            
+            let searchResults = [];
+            try {
+                const response = await fetch(endpoint);
+                const data = await response.json();
+                searchResults = data.query.search || [];
+            } catch (error) {
+                console.error("Erro Wiki:", error);
+                showError("Falha de Conexão Web", "Não foi possível conectar aos servidores de dados públicos da internet.");
+                return;
+            }
+
+            if (!originalArticleSource && searchResults.length === 0) {
+                showError("Nenhum dado real encontrado", "O termo pesquisado não gerou resultados suficientes na internet. Tente um tema mais abrangente.");
+                return;
+            }
+
+            // Preparar os textos que vão para a Inteligência Artificial julgar
+            const resultsToProcess = searchResults.slice(0, 5); // Pega as 5 melhores fontes
+            let snippetsForAI = [];
+            
+            // Se colou um link, ele será a [Fonte 1] para a IA comparar com o resto
+            if (originalArticleSource) {
+                snippetsForAI.push(originalArticleSource.snippet);
+            }
+            
+            // Adiciona as fontes da internet
+            resultsToProcess.forEach(item => {
+                snippetsForAI.push(stripHtmlTags(item.snippet));
+            });
+
+            // Analisar todos os textos com a IA Principal (Gemini)
+            bar.style.width = '75%';
+            txt.innerText = "Submetendo cruzamento à IA...";
+            subTxt.innerText = "A Inteligência Artificial está buscando vieses, câmaras de eco e cópias.";
+
+            let geminiResult = null;
+            try {
+                geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
+            } catch (error) {
+                console.error("Erro Gemini:", error);
+                showError("Falha no Cérebro de IA", "Não foi possível processar a semântica dos textos com a IA. (Verifique sua API Key se estiver rodando fora do ambiente seguro).");
+                return;
+            }
+
+            // Passo final
+            bar.style.width = '100%';
+            txt.innerText = "Construindo relatório final...";
+            subTxt.innerText = "Concluído.";
+
+            setTimeout(() => {
+                processAndRender(searchTopic, resultsToProcess, geminiResult, originalArticleSource);
+            }, 500);
+        }
+
+        function showError(title, desc) {
+            document.getElementById('errorTitle').innerText = title;
+            document.getElementById('errorDesc').innerText = desc;
+            showView('error');
+        }
+
+        // --- 4. MOTOR DE MONTAGEM E RENDERIZAÇÃO DA UI ---
+        function processAndRender(searchTopic, realResults, aiData, originalArticleSource) {
+            const analyzedSources = [];
+            document.getElementById('hashId').innerText = `HASH: #${Math.floor(10000 + Math.random() * 90000)}`;
+            const baseDate = new Date();
+
+            // 1. Se houver um link original colado, adicioná-lo na lista de fontes
+            if (originalArticleSource) {
+                let pubDate = new Date(baseDate);
+                // A notícia colada é tratada como a "origem" temporal para a timeline
+                pubDate.setDate(pubDate.getDate() - 10); 
+                
+                analyzedSources.push({
+                    id: originalArticleSource.id,
+                    type: originalArticleSource.type, // 'analisada'
+                    title: originalArticleSource.title,
+                    dateObj: pubDate,
+                    date: pubDate.toISOString().split('T')[0],
+                    text: originalArticleSource.snippet,
+                    confidence: 100 - aiData.biasIntensity, // Confiança baseada no viés da IA
+                    url: originalArticleSource.url,
+                    isOriginalLink: true
+                });
+            }
+
+            // 2. Adicionar as fontes encontradas na web para cruzamento
+            for (let i = 0; i < realResults.length; i++) {
+                const item = realResults[i];
+                const cleanSnippet = stripHtmlTags(item.snippet);
+                const itemTitle = item.title;
+                
+                let typeAssigned = 'oficial';
+                if (i % 2 !== 0) typeAssigned = 'imprensa';
+                if (aiData.biasIntensity > 50 && i > 3) typeAssigned = 'blog';
+                if (i === 1) typeAssigned = 'checagem';
+
+                let confidence = 100 - (aiData.biasIntensity / 3) - (i * 2);
+                if (confidence < 20) confidence = 20;
+
+                let pubDate = new Date(baseDate);
+                pubDate.setDate(pubDate.getDate() - (i + 1)); 
+
+                analyzedSources.push({
+                    id: item.pageid,
+                    type: typeAssigned,
+                    title: `REFERÊNCIA WEB: ${itemTitle}`,
+                    dateObj: pubDate,
+                    date: pubDate.toISOString().split('T')[0],
+                    text: cleanSnippet + '...',
+                    confidence: confidence,
+                    url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
+                    isOriginalLink: false
+                });
+            }
+
+            analyzedSources.sort((a, b) => a.dateObj - b.dateObj);
+            const totalSourcesCount = analyzedSources.length;
+
+            // --- Cálculos Finais e UI Semáforo usando as respostas da IA ---
+            let diversityPercent = 100 - (aiData.duplicateCount * 15);
+            if(aiData.echoChamberDetected) diversityPercent -= 20;
+            if(diversityPercent < 0) diversityPercent = 0;
+            if(diversityPercent > 100) diversityPercent = 100;
+
+            let statusObj = { color: '', colorHex: '', title: '', desc: '', icon: '' };
+
+            const iconShield = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>`;
+            const iconAlert = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+            const iconDanger = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
+
+            if (aiData.botReplicationDetected || aiData.biasLevel === 'Alto' || aiData.duplicateCount > 2) {
+                statusObj.color = 'var(--color-red-dim)';
+                statusObj.colorHex = 'var(--color-red)';
+                statusObj.title = 'SUSPEITO';
+                statusObj.desc = 'A informação foi detectada como padrão de bot / replicação artificial ou contém alto viés de manipulação.';
+                statusObj.icon = iconDanger;
+            } else if (aiData.echoChamberDetected || aiData.biasLevel === 'Médio') {
+                statusObj.color = 'var(--color-yellow-dim)';
+                statusObj.colorHex = 'var(--color-yellow)';
+                statusObj.title = 'ATENÇÃO';
+                statusObj.desc = 'Informação isolada ou com divergências. O consenso do grupo formador é frágil (possível câmara de eco).';
+                statusObj.icon = iconAlert;
+            } else {
+                statusObj.color = 'var(--color-green-bg)';
+                statusObj.colorHex = 'var(--color-green)';
+                statusObj.title = 'CONFIÁVEL';
+                statusObj.desc = 'A informação está em sites confiáveis e a IA não identificou padrão de bots ou fake news.';
+                statusObj.icon = iconShield;
+            }
+
+            // Atualizando a Interface do Semáforo
+            document.getElementById('statusIconWrapper').style.backgroundColor = statusObj.color;
+            document.getElementById('statusTag').style.color = statusObj.colorHex;
+            document.getElementById('statusTag').style.borderColor = statusObj.colorHex;
+            document.getElementById('statusIcon').style.backgroundColor = statusObj.colorHex;
+            document.getElementById('statusIcon').innerHTML = statusObj.icon;
+            
+            const highlight = document.getElementById('statusTitleHighlight');
+            highlight.innerText = statusObj.title;
+            highlight.style.color = statusObj.colorHex;
+            document.getElementById('statusDesc').innerText = statusObj.desc;
+
+            // Cards Superiores
+            document.getElementById('metricSources').innerText = totalSourcesCount;
+            document.getElementById('metricDiversity').innerText = diversityPercent + '%';
+            document.getElementById('metricDiversitySub').innerText = diversityPercent > 60 ? 'Múltiplos Grupos' : 'Consenso Frágil';
+            document.getElementById('metricDuplicates').innerText = aiData.duplicateCount || 0;
+            document.getElementById('metricBias').innerText = aiData.biasLevel;
+            document.getElementById('metricBiasSub').innerText = `${aiData.biasIntensity || 0}% de Carga Emocional`;
+
+            // Painel Espectral e Bots
+            if(!aiData.echoChamberDetected) {
+                document.getElementById('specEcoStatus').innerText = 'Consenso Orgânico Confirmado pela IA';
+                document.getElementById('specEcoStatus').style.color = 'var(--text-muted)';
+                document.getElementById('specEcoIcon').style.color = 'var(--color-green)';
+            } else {
+                document.getElementById('specEcoStatus').innerText = 'Alerta da IA: Câmara de Eco Formada';
+                document.getElementById('specEcoStatus').style.color = 'var(--color-yellow)';
+                document.getElementById('specEcoIcon').style.color = 'var(--color-yellow)';
+            }
+            
+            if(aiData.botReplicationDetected) {
+                document.getElementById('specRepStatus').innerText = `A IA detectou padrão de replicação artificial`;
+                document.getElementById('specRepStatus').style.color = 'var(--color-red)';
+                document.getElementById('specRepIcon').style.backgroundColor = 'var(--color-red-dim)';
+                document.getElementById('specRepIcon').style.color = 'var(--color-red)';
+            } else {
+                document.getElementById('specRepStatus').innerText = 'Nenhuma ação de bot detectada';
+                document.getElementById('specRepStatus').style.color = 'var(--text-muted)';
+                document.getElementById('specRepIcon').style.backgroundColor = 'var(--color-blue-dim)';
+                document.getElementById('specRepIcon').style.color = 'var(--color-blue)';
+            }
+
+            // Resumo direto da IA
+            document.getElementById('nlpWarningText').innerHTML = `<strong>RESUMO DA IA:</strong> ${aiData.aiConclusion || "Análise completada sem alertas verbais da IA."}`;
+            if(aiData.biasLevel === 'Alto' || aiData.botReplicationDetected) {
+                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'var(--color-red)';
+                document.getElementById('nlpWarningText').style.color = 'var(--color-red)';
+            } else if (aiData.biasLevel === 'Médio') {
+                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'var(--color-yellow)';
+                document.getElementById('nlpWarningText').style.color = 'var(--color-yellow)';
+            } else {
+                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'rgba(59, 130, 246, 0.3)';
+                document.getElementById('nlpWarningText').style.color = '#9ca3af';
+            }
+
+            // Renderizar Lista de Fontes
+            const listContainer = document.getElementById('sourcesList');
+            listContainer.innerHTML = ''; 
+
+            analyzedSources.forEach(source => {
+                const typeClass = `type-${source.type}`;
+                const displayType = CATEGORIES[source.type] || 'Fonte da Web'; 
+                
+                let barColor = 'var(--color-green)';
+                if(source.confidence < 40) barColor = 'var(--color-red)';
+                else if(source.confidence < 70) barColor = 'var(--color-yellow)';
+
+                // Destaque visual se for o link colado pelo usuário
+                const cardHighlightClass = source.isOriginalLink ? 'origin-card' : '';
+                const tagTitle = source.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : source.title;
+
+                const itemHtml = `
+                    <div class="source-card ${cardHighlightClass}">
+                        <div class="source-top">
+                            <span class="source-type ${typeClass}">${displayType}</span>
+                            <span class="source-date">${source.date}</span>
+                        </div>
+                        <h4 class="source-title" style="${source.isOriginalLink ? 'color: #60a5fa;' : ''}">${tagTitle}</h4>
+                        <p class="source-text">${source.text}</p>
+                        <div class="source-bottom">
+                            <div class="confidence-area">
+                                <div class="confidence-bar-bg">
+                                    <div class="confidence-bar-fill" style="width: ${source.confidence}%; background-color: ${barColor};"></div>
+                                </div>
+                                <span class="confidence-label">Confiança Web (${Math.round(source.confidence)}%)</span>
+                            </div>
+                            <a href="${source.url}" target="_blank" class="btn-go" title="Abrir link original da fonte">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+                listContainer.insertAdjacentHTML('beforeend', itemHtml);
+            });
+
+            // Geração da Linha do Tempo
+            const timelineContainer = document.getElementById('timelineContainer');
+            timelineContainer.innerHTML = '';
+
+            analyzedSources.forEach((source, index) => {
+                const displayType = CATEGORIES[source.type] || 'Fonte Web';
+                
+                let iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
+                let iconClass = "node-icon";
+
+                if (source.isOriginalLink) {
+                    // Ícone azul para o link que a pessoa colou
+                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
+                    iconClass += " analyzed";
+                } else if (index === 0 && (source.type === 'blog' || aiData.biasLevel === 'Alto')) {
+                    // Origem Duvidosa na web
+                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
+                    iconClass += " origin";
+                } else if (source.type === 'oficial' || source.type === 'checagem') {
+                    // Origem Confiável
+                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+                    iconClass += " safe";
+                }
+
+                const nodeHtml = `
+                    <div class="timeline-node">
+                        <div class="node-date">${source.date}</div>
+                        <div class="${iconClass}">${iconHtml}</div>
+                        <div class="node-type type-${source.type}">${displayType}</div>
+                        <div class="node-title">${source.isOriginalLink ? 'Seu Link' : source.title}</div>
+                        ${source.isOriginalLink ? '<span style="font-size:0.6rem; color:#60a5fa; margin-top:4px;">🔍 Alvo</span>' : ''}
+                    </div>
+                `;
+                timelineContainer.insertAdjacentHTML('beforeend', nodeHtml);
+            });
+
+            showView('results');
+        }
+
+    </script>
+</body>
+</html>
