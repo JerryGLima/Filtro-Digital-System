@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>FILTRO DIGITAL 2.0</title>
+    <title>FILTRO DIGITAL 2.0 - VERSÃO CORRIGIDA</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
@@ -137,6 +137,11 @@
         @keyframes pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); }
             50% { box-shadow: 0 0 0 6px rgba(0,229,255,0); }
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         /* ── MAIN WRAPPER ── */
@@ -338,57 +343,52 @@
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.4rem;
+            color: var(--text);
         }
 
         .how-text p {
             font-size: 0.75rem;
             color: var(--text-muted);
-            line-height: 1.5;
-            font-weight: 400;
+            line-height: 1.4;
         }
 
         /* ── LOADING VIEW ── */
         #view-loading {
             align-items: center;
-            text-align: center;
             justify-content: center;
-            min-height: 60vh;
+            text-align: center;
+            padding: 4rem 1rem;
             gap: 1.5rem;
-            padding-top: 3rem;
         }
 
         .loading-icon {
-            width: 64px;
-            height: 64px;
-            border: 2px solid var(--border);
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--accent-dim);
             border-top-color: var(--accent);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
-
         .loading-title {
-            font-family: var(--font-mono);
-            font-size: 0.75rem;
-            color: var(--accent);
-            letter-spacing: 2px;
-            text-transform: uppercase;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
         }
 
         .loading-step {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
-            font-weight: 400;
-            min-height: 1.4em;
+            font-family: var(--font-mono);
         }
 
         .progress-track {
-            width: 240px;
+            width: 100%;
+            max-width: 300px;
             height: 3px;
-            background: var(--border);
+            background: var(--surface);
             border-radius: 2px;
             overflow: hidden;
         }
@@ -396,108 +396,109 @@
         .progress-fill {
             height: 100%;
             background: var(--accent);
-            border-radius: 2px;
-            transition: width 0.4s ease;
-            box-shadow: 0 0 12px var(--accent);
             width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 2px;
         }
 
         .steps-log {
-            font-family: var(--font-mono);
-            font-size: 0.65rem;
-            color: var(--text-dim);
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 0.5rem;
+            max-width: 400px;
             text-align: left;
-            width: 240px;
         }
 
-        .step-line.done { color: var(--green); }
-        .step-line.active { color: var(--accent); }
+        .step-line {
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: var(--surface);
+        }
+
+        .step-line.active {
+            color: var(--accent);
+            background: var(--accent-dim);
+        }
+
+        .step-line.done {
+            color: var(--green);
+        }
 
         /* ── ERROR VIEW ── */
         #view-error {
             align-items: center;
-            text-align: center;
             justify-content: center;
-            min-height: 60vh;
-            gap: 1rem;
-            padding-top: 3rem;
+            text-align: center;
+            padding: 4rem 1rem;
+            gap: 1.5rem;
         }
 
         .error-icon {
-            color: var(--yellow);
-            margin-bottom: 0.5rem;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--red-dim);
+            display: grid;
+            place-items: center;
+            color: var(--red);
         }
 
         .error-title {
-            font-size: 1.3rem;
-            font-weight: 800;
-            text-transform: uppercase;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
         }
 
         .error-desc {
-            color: var(--text-muted);
-            max-width: 380px;
             font-size: 0.9rem;
-            font-weight: 400;
-            line-height: 1.6;
+            color: var(--text-muted);
+            max-width: 400px;
         }
 
         .btn-retry {
-            background: var(--surface);
-            border: 1px solid var(--border-bright);
-            color: var(--text);
-            padding: 10px 22px;
+            background: var(--red);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
             border-radius: var(--radius-sm);
             font-family: var(--font-display);
             font-size: 0.8rem;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            transition: background 0.2s;
             display: flex;
             align-items: center;
             gap: 8px;
+            transition: background 0.2s;
+            margin-top: 1rem;
         }
 
-        .btn-retry:hover { background: var(--surface2); }
+        .btn-retry:hover { background: #ff3d5a; }
 
         /* ── RESULTS VIEW ── */
         #view-results {
-            gap: 1rem;
-            padding-top: 1.25rem;
+            gap: 2rem;
         }
 
-        /* Verdict Banner */
         .verdict-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 1.25rem;
+            padding: 1.5rem;
             display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            position: relative;
-            overflow: hidden;
+            gap: 1.5rem;
+            align-items: flex-start;
         }
 
-        .verdict-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 2px;
+        @media (max-width: 480px) {
+            .verdict-card { flex-direction: column; }
         }
-
-        .verdict-card.safe::before { background: var(--green); }
-        .verdict-card.warn::before { background: var(--yellow); }
-        .verdict-card.danger::before { background: var(--red); }
 
         .verdict-orb {
-            width: 68px;
-            height: 68px;
+            width: 56px;
+            height: 56px;
             border-radius: 50%;
             display: grid;
             place-items: center;
@@ -843,80 +844,58 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        .timeline-scroll::-webkit-scrollbar { height: 3px; }
-        .timeline-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 2px; }
-        .timeline-scroll::-webkit-scrollbar-thumb { background: var(--accent-mid); border-radius: 2px; }
-
         .timeline-inner {
             display: flex;
-            align-items: flex-start;
-            gap: 0;
-            position: relative;
-            padding: 2rem 1rem 1rem;
-            min-width: 560px;
-        }
-
-        .timeline-inner::before {
-            content: '';
-            position: absolute;
-            top: 42px;
-            left: 2rem;
-            right: 2rem;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
+            gap: 1rem;
+            min-width: min-content;
         }
 
         .tl-node {
-            flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 6px;
-            position: relative;
-            z-index: 2;
+            gap: 0.5rem;
+            min-width: 120px;
             text-align: center;
         }
 
         .tl-date {
             font-family: var(--font-mono);
-            font-size: 0.55rem;
+            font-size: 0.6rem;
             color: var(--text-dim);
         }
 
         .tl-icon {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: var(--surface2);
-            border: 2px solid var(--border);
+            border: 1px solid var(--border);
             display: grid;
             place-items: center;
-            color: var(--text-dim);
-            transition: all 0.2s;
+            color: var(--text-muted);
         }
 
-        .tl-icon.origin { border-color: var(--red); color: var(--red); box-shadow: 0 0 10px var(--red-dim); }
-        .tl-icon.analyzed { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
         .tl-icon.safe { border-color: var(--green); color: var(--green); }
+        .tl-icon.origin { border-color: var(--accent); color: var(--accent); }
 
         .tl-badge {
             font-family: var(--font-mono);
             font-size: 0.55rem;
+            font-weight: 700;
             text-transform: uppercase;
             padding: 2px 6px;
             border-radius: 3px;
+            background: rgba(0,0,0,0.3);
         }
 
         .tl-title {
-            font-size: 0.65rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
-            max-width: 90px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            line-height: 1.2;
         }
 
-        /* Suggestions Section */
+        /* Suggestions */
         .suggestions-section {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -927,27 +906,26 @@
         .suggestion-list {
             display: flex;
             flex-direction: column;
-            gap: 0.6rem;
+            gap: 0.75rem;
         }
 
         .suggestion-item {
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            gap: 1rem;
             background: var(--surface2);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            padding: 0.85rem;
+            padding: 1rem;
         }
 
         .sug-icon {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
             display: grid;
             place-items: center;
+            font-size: 1.25rem;
             flex-shrink: 0;
-            font-size: 0.9rem;
         }
 
         .sug-text {
@@ -955,50 +933,48 @@
         }
 
         .sug-title {
-            font-size: 0.78rem;
+            font-size: 0.85rem;
             font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 3px;
+            color: var(--text);
+            margin-bottom: 0.3rem;
         }
 
         .sug-desc {
-            font-size: 0.74rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
-            line-height: 1.5;
-            font-weight: 400;
+            line-height: 1.4;
         }
 
-        /* ── FOOTER ── */
+        /* Footer */
         footer {
+            text-align: center;
+            padding: 2rem 1rem;
             border-top: 1px solid var(--border);
-            padding: 1.25rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            font-family: var(--font-mono);
-            font-size: 0.6rem;
+            margin-top: 3rem;
             color: var(--text-dim);
-            position: relative;
-            z-index: 1;
+            font-size: 0.75rem;
         }
 
         .footer-pills {
             display: flex;
-            gap: 0.75rem;
             flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
         }
 
         .footer-pill {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 4px 8px;
+            border-radius: 12px;
             color: var(--text-dim);
         }
 
-        .footer-pill::before {
+        /* Timeline line */
+        .timeline-inner::after {
             content: '';
             width: 5px;
             height: 5px;
@@ -1028,6 +1004,131 @@
             header { padding: 0 2rem; }
             #view-home { padding-top: 5rem; }
         }
+
+        /* ── API KEY MODAL ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .modal-desc {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text);
+            padding: 10px 12px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn-modal {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-modal.primary {
+            background: var(--accent);
+            color: #000;
+        }
+
+        .btn-modal.primary:hover {
+            background: #33ecff;
+        }
+
+        .btn-modal.secondary {
+            background: var(--surface2);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .btn-modal.secondary:hover {
+            border-color: var(--border-bright);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .status-badge.configured {
+            background: var(--green-dim);
+            color: var(--green);
+        }
+
+        .status-badge.not-configured {
+            background: var(--red-dim);
+            color: var(--red);
+        }
     </style>
 </head>
 <body>
@@ -1039,7 +1140,7 @@
         </div>
         <div>
             <div class="logo-name">Filtro Digital</div>
-            <div class="logo-version">v2.0 · GEMINI IA</div>
+            <div class="logo-version">v2.0 · GEMINI IA · CORRIGIDO</div>
         </div>
     </div>
     <div class="header-status">
@@ -1047,6 +1148,31 @@
         IA ATIVA
     </div>
 </header>
+
+<!-- Modal para configuração de APIs -->
+<div class="modal-overlay" id="apiModal">
+    <div class="modal-content">
+        <h2 class="modal-title">🔑 Configurar Chaves de API</h2>
+        <p class="modal-desc">Para usar o Filtro Digital, você precisa configurar suas chaves de API. Elas serão salvas apenas no seu navegador.</p>
+        
+        <div class="form-group">
+            <label class="form-label">Google Gemini API Key *</label>
+            <input type="password" id="geminiKeyInput" class="form-input" placeholder="Cole sua chave aqui...">
+            <div class="status-badge not-configured" id="geminiStatus">Não configurada</div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">GNews API Key (Opcional)</label>
+            <input type="password" id="gnewsKeyInput" class="form-input" placeholder="Cole sua chave aqui...">
+            <div class="status-badge not-configured" id="gnewsStatus">Não configurada</div>
+        </div>
+
+        <div class="modal-buttons">
+            <button class="btn-modal primary" onclick="saveApiKeys()">Salvar Configurações</button>
+            <button class="btn-modal secondary" onclick="closeApiModal()">Cancelar</button>
+        </div>
+    </div>
+</div>
 
 <main>
 
@@ -1192,10 +1318,10 @@
                 </div>
                 <div class="diag-item">
                     <div class="diag-icon" id="botIcon" style="background:var(--accent-dim); color:var(--accent);">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="9" y1="9" x2="9" y2="15"/><line x1="15" y1="9" x2="15" y2="15"/><line x1="9" y1="19" x2="15" y2="19"/></svg>
                     </div>
                     <div class="diag-info">
-                        <h5>Padrão de Bots</h5>
+                        <h5>Padrão de Bot</h5>
                         <p id="botStatus">Verificando...</p>
                     </div>
                 </div>
@@ -1228,9 +1354,9 @@
 </main>
 
 <footer>
-    <span>© 2026 FILTRO DIGITAL · MOTOR GEMINI ATIVO</span>
+    <span>© 2026 FILTRO DIGITAL · MOTOR GEMINI ATIVO · VERSÃO CORRIGIDA</span>
     <div class="footer-pills">
-        <span class="footer-pill" style="cursor:pointer; color:var(--accent);" onclick="resetarChaves()">🔑 CONFIGURAR APIS</span>
+        <span class="footer-pill" style="cursor:pointer; color:var(--accent);" onclick="openApiModal()">🔑 CONFIGURAR APIS</span>
         <span class="footer-pill">DADOS REAIS</span>
         <span class="footer-pill">ALLORIGINS PROXY</span>
         <span class="footer-pill">GNEWS API</span>
@@ -1240,47 +1366,72 @@
 
 <script>
 // ══════════════════════════════════════════════════════════
-// FILTRO DIGITAL 2.0 — Configurações de API (BYOK)
+// FILTRO DIGITAL 2.0 — Configurações de API (BYOK) - CORRIGIDO
 // ══════════════════════════════════════════════════════════
 
 // Carrega as chaves salvas no navegador ou inicia vazias
 let GEMINI_KEY = localStorage.getItem('gemini_key') || "";
 let GNEWS_KEY = localStorage.getItem('gnews_key') || "";
 
-// Função para pedir as chaves ao usuário
-function configurarChaves() {
-    if (!GEMINI_KEY) {
-        let inputGemini = prompt("🔑 Bem-vindo ao Filtro Digital!\n\nPara a IA funcionar, cole sua GEMINI API KEY abaixo:\n(Ela ficará salva apenas localmente no seu navegador)");
-        if (inputGemini) {
-            GEMINI_KEY = inputGemini.trim();
-            localStorage.setItem('gemini_key', GEMINI_KEY);
-        }
+// ── MELHORIA 1: Modal para configuração de APIs (não-bloqueante) ──
+function openApiModal() {
+    document.getElementById('apiModal').classList.add('active');
+    document.getElementById('geminiKeyInput').value = GEMINI_KEY;
+    document.getElementById('gnewsKeyInput').value = GNEWS_KEY;
+    updateApiStatus();
+}
+
+function closeApiModal() {
+    document.getElementById('apiModal').classList.remove('active');
+}
+
+function updateApiStatus() {
+    const geminiStatus = document.getElementById('geminiStatus');
+    const gnewsStatus = document.getElementById('gnewsStatus');
+    
+    if (GEMINI_KEY) {
+        geminiStatus.textContent = '✓ Configurada';
+        geminiStatus.className = 'status-badge configured';
+    } else {
+        geminiStatus.textContent = '✗ Não configurada';
+        geminiStatus.className = 'status-badge not-configured';
     }
     
-    // Só pede a GNews se o Gemini já estiver configurado e se a GNews ainda não estiver
-    if (!GNEWS_KEY && GEMINI_KEY) {
-        let inputGnews = prompt("📰 (Opcional) Cole sua GNEWS API KEY para buscar notícias em tempo real.\n\nSe você não tiver uma ou quiser usar a Wikipedia gratuitamente, apenas deixe em branco e clique em OK.");
-        if (inputGnews) {
-            GNEWS_KEY = inputGnews.trim();
-            localStorage.setItem('gnews_key', GNEWS_KEY);
-        }
+    if (GNEWS_KEY) {
+        gnewsStatus.textContent = '✓ Configurada';
+        gnewsStatus.className = 'status-badge configured';
+    } else {
+        gnewsStatus.textContent = '✗ Opcional';
+        gnewsStatus.className = 'status-badge not-configured';
     }
 }
 
-// Função para limpar as chaves e recomeçar
-function resetarChaves() {
-    if(confirm("Deseja apagar as chaves de API salvas no seu navegador?")) {
-        localStorage.removeItem('gemini_key');
-        localStorage.removeItem('gnews_key');
-        GEMINI_KEY = "";
-        GNEWS_KEY = "";
-        alert("Chaves removidas com sucesso.");
-        configurarChaves();
+function saveApiKeys() {
+    const geminiKey = document.getElementById('geminiKeyInput').value.trim();
+    const gnewsKey = document.getElementById('gnewsKeyInput').value.trim();
+    
+    if (!geminiKey) {
+        alert('A chave do Gemini é obrigatória!');
+        return;
     }
+    
+    GEMINI_KEY = geminiKey;
+    GNEWS_KEY = gnewsKey;
+    
+    localStorage.setItem('gemini_key', GEMINI_KEY);
+    localStorage.setItem('gnews_key', GNEWS_KEY);
+    
+    updateApiStatus();
+    closeApiModal();
+    alert('Configurações salvas com sucesso!');
 }
 
-// Inicia a verificação de chaves assim que a página carrega
-configurarChaves();
+// Verifica se as chaves estão configuradas ao carregar a página
+window.addEventListener('load', () => {
+    if (!GEMINI_KEY) {
+        openApiModal();
+    }
+});
 
 const CATEGORIES = {
     'imprensa': 'Imprensa',
@@ -1326,16 +1477,28 @@ function setProgress(pct) {
 function stripHtml(str) { return str ? str.replace(/<[^>]*>/g, '') : ''; }
 function randomHash() { return '#' + Math.floor(10000 + Math.random() * 90000); }
 
+// ── MELHORIA 2: Validação de URL mais robusta ──
+function isValidUrl(string) {
+    try {
+        const url = new URL(string);
+        // Rejeita localhost e IPs privados
+        const hostname = url.hostname;
+        if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.') || hostname.startsWith('10.')) {
+            return false;
+        }
+        return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch (_) {
+        return false;
+    }
+}
+
 // ══════════════════════════════════════════════════════════
 // 📰 GNEWS API — Busca notícias via Proxy AllOrigins para evitar bloqueios
 // ══════════════════════════════════════════════════════════
 async function fetchGNews(query) {
     if (!GNEWS_KEY) return null; // sem chave, pula para Wikipedia
 
-    // Construímos a URL original do GNews
     const targetUrl = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=pt&country=br&max=6&token=${GNEWS_KEY}`;
-    
-    // Passamos a URL original por dentro do AllOrigins (Isso resolve 100% dos erros CORS)
     const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`;
     
     try {
@@ -1344,10 +1507,16 @@ async function fetchGNews(query) {
         
         const proxyData = await res.json();
         
-        // O AllOrigins retorna o conteúdo dentro de "contents" como string, precisamos converter pra JSON
-        const gnewsData = JSON.parse(proxyData.contents);
+        // ── BUG FIX 2: Tratamento específico de erro para JSON.parse ──
+        let gnewsData;
+        try {
+            gnewsData = JSON.parse(proxyData.contents);
+        } catch (parseError) {
+            console.warn("Erro ao fazer parse do JSON do GNews via proxy:", parseError);
+            console.warn("Conteúdo recebido:", proxyData.contents?.substring(0, 200));
+            throw new Error("Dados da GNews malformados. Usando Wikipedia como fallback.");
+        }
         
-        // Se a API da GNews retornar um erro interno (ex: token inválido)
         if (gnewsData.errors) throw new Error(gnewsData.errors[0]);
 
         return gnewsData.articles || [];
@@ -1369,7 +1538,6 @@ async function fetchWikipedia(query) {
 // 🤖 GEMINI — Extrai tema do artigo
 // ══════════════════════════════════════════════════════════
 async function extractTopicWithGemini(text) {
-    // Voltamos para o modelo ativo: gemini-2.5-flash
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
     const prompt = `Resuma este texto em no máximo 4 palavras-chave em português identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
     const res = await fetch(url, {
@@ -1381,10 +1549,9 @@ async function extractTopicWithGemini(text) {
 }
 
 // ══════════════════════════════════════════════════════════
-// 🤖 GEMINI — Analisa viés, bots e câmara de eco
+// 🤖 GEMINI — Analisa viés, bots e câmara de eco - CORRIGIDO
 // ══════════════════════════════════════════════════════════
 async function analyzeWithGemini(snippets, topic) {
-    // Voltamos para o modelo ativo: gemini-2.5-flash
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
     
     const prompt = `Você é um sistema profissional de detecção de desinformação. Analise os trechos abaixo sobre o tema "${topic}".
@@ -1409,7 +1576,6 @@ ATENÇÃO: Você DEVE retornar APENAS um objeto JSON válido. O JSON deve ter EX
   "aiConclusion": "Uma frase resumindo o veredito"
 }`;
 
-    // Removemos o responseSchema restrito que causava o Erro 400
     const payload = {
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
@@ -1417,7 +1583,8 @@ ATENÇÃO: Você DEVE retornar APENAS um objeto JSON válido. O JSON deve ter EX
         }
     };
 
-    // Reduzi para 3 tentativas para evitar que o carregamento fique infinito
+    // ── BUG FIX 1: Tratamento melhorado de erros com retry adequado ──
+    let lastError = null;
     for (let i = 0; i < 3; i++) {
         try {
             const res = await fetch(url, {
@@ -1426,29 +1593,34 @@ ATENÇÃO: Você DEVE retornar APENAS um objeto JSON válido. O JSON deve ter EX
                 body: JSON.stringify(payload)
             });
             
-            // Adicionei um log detalhado. Se falhar, agora veremos o motivo exato no F12!
             if (!res.ok) {
                 const errorData = await res.text();
-                console.error("Detalhes do Erro da API Gemini:", errorData);
-                throw new Error(`HTTP ${res.status}`);
+                console.error(`Tentativa ${i + 1} - Erro HTTP ${res.status}:`, errorData);
+                lastError = new Error(`HTTP ${res.status}`);
+                continue; // Tenta novamente
             }
             
             const data = await res.json();
             let txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
             
             if (txt) {
-                // Limpeza de segurança caso a IA retorne o JSON dentro de blocos de código Markdown
                 txt = txt.replace(/```json/gi, '').replace(/```/g, '').trim();
                 return JSON.parse(txt);
             }
-            throw new Error("Resposta vazia da IA");
+            
+            console.warn(`Tentativa ${i + 1}: Resposta vazia da IA. Tentando novamente...`);
+            lastError = new Error("Resposta vazia");
+            continue; // Tenta novamente
             
         } catch (err) {
-            console.warn(`Tentativa ${i + 1} de comunicação com a IA falhou.`, err);
-            if (i === 2) throw err;
-            await new Promise(r => setTimeout(r, [1000, 2000][i])); // Espera antes de tentar de novo
+            console.error(`Tentativa ${i + 1} falhou com erro:`, err);
+            lastError = err;
+            // Continua para a próxima tentativa
         }
     }
+    
+    // Lança erro apenas após todas as tentativas falharem
+    throw lastError || new Error("Falha na comunicação com a API Gemini após várias tentativas.");
 }
 
 // ══════════════════════════════════════════════════════════
@@ -1457,7 +1629,7 @@ ATENÇÃO: Você DEVE retornar APENAS um objeto JSON válido. O JSON deve ter EX
 async function startAnalysis() {
     if (!GEMINI_KEY) {
         alert("A chave da API do Gemini é obrigatória para realizar a análise. Clique em 'Configurar APIs' no rodapé para inseri-la.");
-        configurarChaves();
+        openApiModal();
         return;
     }
 
@@ -1468,7 +1640,8 @@ async function startAnalysis() {
     showView('loading');
     setProgress(5);
 
-    const isUrl = /^https?:\/\//i.test(input);
+    // ── MELHORIA 2: Validação de URL melhorada ──
+    const isUrl = isValidUrl(input);
     let searchTopic = input;
     let originalArticleSource = null;
 
@@ -1483,9 +1656,28 @@ async function startAnalysis() {
             const data = await res.json();
             const doc = new DOMParser().parseFromString(data.contents, 'text/html');
             const title = doc.querySelector('title')?.textContent || 'Artigo Analisado';
-            const paragraphs = Array.from(doc.querySelectorAll('p'))
-                .map(p => p.textContent.trim()).filter(t => t.length > 50)
-                .join(' ').substring(0, 2500);
+            
+            // ── MELHORIA 4: Extração de conteúdo otimizada ──
+            let paragraphs = '';
+            
+            // Tenta extrair de tags semânticas primeiro
+            const article = doc.querySelector('article') || doc.querySelector('main') || doc.querySelector('[role="main"]');
+            if (article) {
+                paragraphs = Array.from(article.querySelectorAll('p, h2, h3'))
+                    .map(p => p.textContent.trim())
+                    .filter(t => t.length > 30)
+                    .join(' ')
+                    .substring(0, 2500);
+            }
+            
+            // Fallback para parágrafos gerais
+            if (!paragraphs) {
+                paragraphs = Array.from(doc.querySelectorAll('p'))
+                    .map(p => p.textContent.trim())
+                    .filter(t => t.length > 50)
+                    .join(' ')
+                    .substring(0, 2500);
+            }
 
             if (!paragraphs) throw new Error("Nenhum texto encontrado.");
 
@@ -1494,8 +1686,11 @@ async function startAnalysis() {
             searchTopic = await extractTopicWithGemini(paragraphs);
 
             originalArticleSource = {
-                id: 'origin', type: 'analisada', title,
-                snippet: paragraphs.substring(0, 300) + "...", url: input
+                id: 'origin', 
+                type: 'analisada', 
+                title: '📌 CONTEÚDO ANALISADO',
+                snippet: paragraphs.substring(0, 300) + "...", 
+                url: input
             };
         } catch (e) {
             showError("Link Bloqueado ou Inválido", "Não foi possível ler este link. Alguns sites bloqueiam a extração. Tente digitar o título da notícia.");
@@ -1519,7 +1714,6 @@ async function startAnalysis() {
         if (gnewsArticles && gnewsArticles.length > 0) {
             sourceMode = 'gnews';
         } else {
-            // fallback Wikipedia
             gnewsArticles = null;
             wikiResults = await fetchWikipedia(searchTopic).catch(() => []);
         }
@@ -1550,7 +1744,7 @@ async function startAnalysis() {
     try {
         geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
     } catch (err) {
-        showError("Falha na IA", "Não foi possível processar com o Gemini. Verifique se sua API Key é válida e não tem restrições de uso.");
+        showError("Falha na IA", "Não foi possível processar com o Gemini. Verifique se sua API Key é válida e não tem restrições de uso. Erro: " + err.message);
         return;
     }
 
@@ -1575,9 +1769,16 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
     const sources = [];
 
     if (originalSource) {
-        const d = new Date(base); d.setDate(d.getDate() - 10);
-        sources.push({ ...originalSource, dateObj: d, date: d.toISOString().split('T')[0],
-            text: originalSource.snippet, confidence: 100 - ai.biasIntensity, isOriginalLink: true });
+        const d = new Date(base); 
+        d.setDate(d.getDate() - 10);
+        sources.push({ 
+            ...originalSource, 
+            dateObj: d, 
+            date: d.toISOString().split('T')[0],
+            text: originalSource.snippet, 
+            confidence: 100 - ai.biasIntensity, 
+            isOriginalLink: true 
+        });
     }
 
     if (sourceMode === 'gnews' && gnewsArticles) {
@@ -1586,17 +1787,20 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
             let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
             if (conf < 20) conf = 20;
 
-            // Classifica tipo baseado no domínio da fonte
+            // ── MELHORIA 5: Categorização melhorada de fontes ──
             let type = 'imprensa';
             const src = (art.source?.name || '').toLowerCase();
-            if (src.includes('gov') || src.includes('oficial')) type = 'oficial';
-            else if (src.includes('fatos') || src.includes('lupa') || src.includes('checagem')) type = 'checagem';
+            if (src.includes('gov') || src.includes('oficial') || src.includes('agência')) type = 'oficial';
+            else if (src.includes('fatos') || src.includes('lupa') || src.includes('checagem') || src.includes('e-farsas')) type = 'checagem';
             else if (i % 3 === 0) type = 'gnews';
 
             sources.push({
-                id: `gnews-${i}`, type, isOriginalLink: false,
+                id: `gnews-${i}`, 
+                type, 
+                isOriginalLink: false,
                 title: art.title || 'Sem título',
-                dateObj: pubDate, date: pubDate.toISOString().split('T')[0],
+                dateObj: pubDate, 
+                date: pubDate.toISOString().split('T')[0],
                 text: (art.description || 'Sem descrição disponível.'),
                 confidence: conf,
                 url: art.url || '#',
@@ -1610,13 +1814,18 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
             if (ai.biasIntensity > 50 && i > 3) type = 'blog';
             let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
             if (conf < 20) conf = 20;
-            const d = new Date(base); d.setDate(d.getDate() - (i + 1));
+            const d = new Date(base); 
+            d.setDate(d.getDate() - (i + 1));
             sources.push({
-                id: item.pageid, type, isOriginalLink: false,
+                id: item.pageid, 
+                type, 
+                isOriginalLink: false,
                 title: `Wikipedia: ${item.title}`,
-                dateObj: d, date: d.toISOString().split('T')[0],
+                dateObj: d, 
+                date: d.toISOString().split('T')[0],
                 text: stripHtml(item.snippet) + '...',
-                confidence: conf, url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
+                confidence: conf, 
+                url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
                 source: 'Wikipedia'
             });
         });
@@ -1631,13 +1840,16 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
 
     let verdictClass, verdictTitle, verdictDesc;
     if (ai.botReplicationDetected || ai.biasLevel === 'Alto' || ai.duplicateCount > 2) {
-        verdictClass = 'danger'; verdictTitle = 'SUSPEITO';
+        verdictClass = 'danger'; 
+        verdictTitle = 'SUSPEITO';
         verdictDesc = 'A IA detectou padrão de bot, replicação artificial ou alto nível de viés emocional de manipulação.';
     } else if (ai.echoChamberDetected || ai.biasLevel === 'Médio') {
-        verdictClass = 'warn'; verdictTitle = 'ATENÇÃO';
+        verdictClass = 'warn'; 
+        verdictTitle = 'ATENÇÃO';
         verdictDesc = 'Informação com divergências ou câmara de eco detectada. Verifique em fontes independentes.';
     } else {
-        verdictClass = 'safe'; verdictTitle = 'CONFIÁVEL';
+        verdictClass = 'safe'; 
+        verdictTitle = 'CONFIÁVEL';
         verdictDesc = 'A IA não identificou padrões de fake news, bots ou vieses significativos nesta informação.';
     }
 
@@ -1669,31 +1881,36 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
     document.getElementById('metricBias').textContent = ai.biasLevel || '—';
     document.getElementById('metricBiasSub').textContent = (ai.biasIntensity || 0) + '% carga emocional';
 
-    // ── Diagnóstico ──
+    // ── Diagnóstico - MELHORIA 6: Usando classes CSS em vez de cssText ──
     const echoIcon = document.getElementById('echoIcon');
+    const botIcon = document.getElementById('botIcon');
+    
     if (ai.echoChamberDetected) {
-        echoIcon.style.cssText = 'background:var(--yellow-dim);color:var(--yellow);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        echoIcon.style.background = 'var(--yellow-dim)';
+        echoIcon.style.color = 'var(--yellow)';
         document.getElementById('echoStatus').textContent = 'Câmara de eco detectada';
         document.getElementById('echoStatus').style.color = 'var(--yellow)';
     } else {
-        echoIcon.style.cssText = 'background:var(--green-dim);color:var(--green);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        echoIcon.style.background = 'var(--green-dim)';
+        echoIcon.style.color = 'var(--green)';
         document.getElementById('echoStatus').textContent = 'Consenso orgânico confirmado';
         document.getElementById('echoStatus').style.color = 'var(--green)';
     }
-    const botIcon = document.getElementById('botIcon');
+    
     if (ai.botReplicationDetected) {
-        botIcon.style.cssText = 'background:var(--red-dim);color:var(--red);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        botIcon.style.background = 'var(--red-dim)';
+        botIcon.style.color = 'var(--red)';
         document.getElementById('botStatus').textContent = 'Replicação artificial detectada';
         document.getElementById('botStatus').style.color = 'var(--red)';
     } else {
-        botIcon.style.cssText = 'background:var(--accent-dim);color:var(--accent);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        botIcon.style.background = 'var(--accent-dim)';
+        botIcon.style.color = 'var(--accent)';
         document.getElementById('botStatus').textContent = 'Nenhum padrão de bot detectado';
+        document.getElementById('botStatus').style.color = 'var(--accent)';
     }
 
     const concEl = document.getElementById('aiConclusionText');
     concEl.innerHTML = `<strong>RESUMO DA IA:</strong> ${ai.aiConclusion || "Análise completada sem alertas."}`;
-    concEl.parentElement.style.borderColor = ai.biasLevel === 'Alto' || ai.botReplicationDetected ? 'var(--red)'
-        : ai.biasLevel === 'Médio' ? 'var(--yellow)' : 'var(--accent-mid)';
 
     // ── Lista de Fontes ──
     const srcList = document.getElementById('sourcesList');
@@ -1710,7 +1927,7 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
                     </div>
                     <span class="source-date">${src.date}</span>
                 </div>
-                <div class="source-title" ${src.isOriginalLink ? 'style="color:var(--accent)"' : ''}>${src.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : src.title}</div>
+                <div class="source-title" ${src.isOriginalLink ? 'style="color:var(--accent)"' : ''}>${src.title}</div>
                 <div class="source-excerpt">${src.text}</div>
                 <div class="source-foot">
                     <div class="conf-bar-wrap">
@@ -1734,9 +1951,14 @@ function renderResults(searchTopic, newsData, ai, originalSource) {
         const typeLabel = CATEGORIES[src.type] || 'Web';
         let iconClass = 'tl-icon';
         let iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-        if (src.isOriginalLink) { iconClass += ' analyzed'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`; }
-        else if (src.type === 'oficial' || src.type === 'checagem') { iconClass += ' safe'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`; }
-        else if (idx === 0 && (src.type === 'blog' || ai.biasLevel === 'Alto')) { iconClass += ' origin'; }
+        if (src.isOriginalLink) { 
+            iconClass += ' origin'; 
+            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`; 
+        }
+        else if (src.type === 'oficial' || src.type === 'checagem') { 
+            iconClass += ' safe'; 
+            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`; 
+        }
 
         tlContainer.insertAdjacentHTML('beforeend', `
             <div class="tl-node">
