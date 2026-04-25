@@ -2,1592 +2,1710 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FILTRO DIGITAL 1.0</title>
-    
-    <!-- ========================================== -->
-    <!-- ESTILOS (CSS)                              -->
-    <!-- ========================================== -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <title>FILTRO DIGITAL 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #060b14;
-            --bg-panel: #111827;
-            --bg-card: #141c2b;
-            --bg-input: #1a2335;
-            --border-color: #1f2937;
-            --border-light: #374151;
-            
-            --text-main: #f9fafb;
-            --text-muted: #9ca3af;
-            --text-dark: #6b7280;
-            
-            /* Status Colors */
-            --color-green: #22c55e;
-            --color-green-light: #4ade80;
-            --color-green-dim: rgba(34, 197, 94, 0.1);
-            --color-green-bg: #064e3b;
-            
-            --color-yellow: #eab308;
-            --color-yellow-dim: rgba(234, 179, 8, 0.1);
-            
-            --color-red: #ef4444;
-            --color-red-dim: rgba(239, 68, 68, 0.1);
+            --bg: #050a0f;
+            --surface: #0d1520;
+            --surface2: #111c2a;
+            --border: rgba(255,255,255,0.07);
+            --border-bright: rgba(255,255,255,0.15);
 
-            --color-blue: #3b82f6;
-            --color-blue-dim: rgba(59, 130, 246, 0.1);
-            
-            --font-family: 'Inter', system-ui, -apple-system, sans-serif;
-            --transition: all 0.3s ease;
+            --accent: #00e5ff;
+            --accent-dim: rgba(0, 229, 255, 0.08);
+            --accent-mid: rgba(0, 229, 255, 0.2);
+
+            --green: #00e676;
+            --green-dim: rgba(0, 230, 118, 0.1);
+            --yellow: #ffea00;
+            --yellow-dim: rgba(255, 234, 0, 0.1);
+            --red: #ff1744;
+            --red-dim: rgba(255, 23, 68, 0.1);
+
+            --text: #f0f4f8;
+            --text-muted: #6b8099;
+            --text-dim: #3d5166;
+
+            --radius: 14px;
+            --radius-sm: 8px;
+            --font-display: 'Inter', sans-serif;
+            --font-mono: 'IBM Plex Mono', monospace;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            font-family: var(--font-family);
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-display);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
-        /* HEADER */
+        /* ── GRID NOISE BACKGROUND ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,229,255,0.06) 0%, transparent 60%),
+                url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.015'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── HEADER ── */
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 3rem;
-            border-bottom: 1px solid var(--border-color);
-            background-color: rgba(6, 11, 20, 0.9);
-            backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
             z-index: 100;
-        }
-
-        .logo-container {
+            background: rgba(5, 10, 15, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border);
+            padding: 0 1.25rem;
+            height: 60px;
             display: flex;
             align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             cursor: pointer;
+            text-decoration: none;
         }
 
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            background-color: var(--color-blue);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--bg-main);
+        .logo-mark {
+            width: 30px;
+            height: 30px;
+            background: var(--accent);
+            border-radius: 7px;
+            display: grid;
+            place-items: center;
+            color: #000;
+            flex-shrink: 0;
         }
 
-        .logo-text span {
-            color: var(--text-muted);
-            font-weight: 400;
+        .logo-name {
+            font-family: var(--font-display);
             font-size: 0.9rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--text);
+            line-height: 1;
         }
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 2rem;
+        .logo-version {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: var(--accent);
+            letter-spacing: 1px;
         }
 
-        .status-badge {
+        .header-status {
             display: flex;
             align-items: center;
-            gap: 8px;
-            background-color: rgba(59, 130, 246, 0.1);
-            padding: 6px 16px;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-mid);
+            padding: 5px 10px;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
+            white-space: nowrap;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #60a5fa;
+        .pulse-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
             border-radius: 50%;
-            box-shadow: 0 0 10px #60a5fa;
-            animation: pulse-blue 2s infinite;
+            animation: pulse 2s infinite;
+            flex-shrink: 0;
         }
 
-        /* MAIN CONTENT AREA */
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(0,229,255,0); }
+        }
+
+        /* ── MAIN WRAPPER ── */
         main {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 3rem 2rem;
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 1300px;
+            max-width: 900px;
             margin: 0 auto;
+            padding: 0 1rem 4rem;
         }
 
-        /* VIEW: HOME (SEARCH) */
+        /* ── VIEWS ── */
+        .view { display: none; }
+        .view.active { display: flex; flex-direction: column; }
+
+        /* ── HOME VIEW ── */
         #view-home {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
             align-items: center;
             text-align: center;
-            justify-content: center;
-            flex: 1;
-            animation: fadeIn 0.5s ease-out;
+            padding-top: 3rem;
+            padding-bottom: 2rem;
+            gap: 0;
         }
 
-        .top-badge {
-            background-color: var(--color-blue-dim);
-            color: #60a5fa;
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 2rem;
+        .hero-badge {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            letter-spacing: 2px;
             text-transform: uppercase;
+            color: var(--accent);
+            background: var(--accent-dim);
+            border: 1px solid var(--accent-mid);
+            padding: 6px 14px;
+            border-radius: 20px;
+            margin-bottom: 2rem;
         }
 
-        h1 {
-            font-size: 3.5rem;
+        .hero-title {
+            font-family: var(--font-display);
+            font-size: clamp(2.2rem, 9vw, 4.5rem);
             font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
+            line-height: 1.0;
             text-transform: uppercase;
             letter-spacing: -1px;
+            margin-bottom: 1.25rem;
         }
 
-        h1 .highlight { color: #60a5fa; }
+        .hero-title .accent { color: var(--accent); }
 
-        .subtitle {
+        .hero-sub {
+            font-family: var(--font-display);
+            font-size: 0.9rem;
             color: var(--text-muted);
-            font-size: 1rem;
-            max-width: 700px;
+            max-width: 480px;
             line-height: 1.6;
-            margin-bottom: 3rem;
+            margin-bottom: 2.5rem;
+            font-weight: 400;
+        }
+
+        /* Search Box */
+        .search-wrapper {
+            width: 100%;
+            max-width: 680px;
+            margin-bottom: 2rem;
         }
 
         .search-box {
-            width: 100%;
-            max-width: 800px;
             display: flex;
-            background-color: var(--bg-input);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 8px;
-            transition: var(--transition);
+            flex-direction: column;
+            gap: 0.75rem;
         }
 
-        .search-box:focus-within {
-            border-color: var(--color-blue);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.1);
+        .search-input-row {
+            display: flex;
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            border-radius: var(--radius);
+            overflow: hidden;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-input-row:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-dim), 0 0 30px rgba(0,229,255,0.05);
         }
 
         .search-icon {
-            padding: 0 15px;
+            padding: 0 14px;
+            color: var(--text-dim);
             display: flex;
             align-items: center;
-            color: var(--text-muted);
+            flex-shrink: 0;
         }
 
         .search-input {
             flex: 1;
             background: transparent;
             border: none;
-            color: var(--text-main);
-            font-size: 1rem;
-            padding: 10px 0;
             outline: none;
+            color: var(--text);
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            padding: 14px 0;
+            min-width: 0;
         }
 
+        .search-input::placeholder { color: var(--text-dim); }
+
         .btn-analyze {
-            background-color: var(--bg-panel);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 0 24px;
-            border-radius: 8px;
-            font-weight: 600;
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0 22px;
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
             cursor: pointer;
-            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+
+        .btn-analyze:hover { background: #33ecff; }
+        .btn-analyze:active { transform: scale(0.97); }
+
+        .search-hint {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            text-align: left;
+            padding: 0 4px;
+        }
+
+        /* Feature pills */
+        .feature-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .pill {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: 20px;
+            letter-spacing: 0.5px;
+        }
+
+        /* ── HOW IT WORKS CARDS ── */
+        .how-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+            width: 100%;
+            max-width: 680px;
+            margin-top: 2.5rem;
+        }
+
+        @media (min-width: 600px) {
+            .how-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        .how-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            text-align: left;
+        }
+
+        @media (min-width: 600px) {
+            .how-card { flex-direction: column; align-items: flex-start; }
+        }
+
+        .how-num {
+            font-family: var(--font-mono);
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--accent);
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .how-text h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .how-text p {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* ── LOADING VIEW ── */
+        #view-loading {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1.5rem;
+            padding-top: 3rem;
+        }
+
+        .loading-icon {
+            width: 64px;
+            height: 64px;
+            border: 2px solid var(--border);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-title {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            color: var(--accent);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .loading-step {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+            min-height: 1.4em;
+        }
+
+        .progress-track {
+            width: 240px;
+            height: 3px;
+            background: var(--border);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 2px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px var(--accent);
+            width: 0%;
+        }
+
+        .steps-log {
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            text-align: left;
+            width: 240px;
+        }
+
+        .step-line.done { color: var(--green); }
+        .step-line.active { color: var(--accent); }
+
+        /* ── ERROR VIEW ── */
+        #view-error {
+            align-items: center;
+            text-align: center;
+            justify-content: center;
+            min-height: 60vh;
+            gap: 1rem;
+            padding-top: 3rem;
+        }
+
+        .error-icon {
+            color: var(--yellow);
+            margin-bottom: 0.5rem;
+        }
+
+        .error-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .error-desc {
+            color: var(--text-muted);
+            max-width: 380px;
+            font-size: 0.9rem;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        .btn-retry {
+            background: var(--surface);
+            border: 1px solid var(--border-bright);
+            color: var(--text);
+            padding: 10px 22px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-display);
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: background 0.2s;
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .btn-analyze:hover {
-            background-color: var(--color-blue);
-            color: var(--bg-main);
-            border-color: var(--color-blue);
-        }
+        .btn-retry:hover { background: var(--surface2); }
 
-        /* VIEW: LOADING */
-        #view-loading {
-            display: none;
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-            margin: auto;
-        }
-
-        .progress-bar-bg {
-            width: 100%;
-            height: 6px;
-            background-color: var(--bg-input);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 1rem;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background-color: var(--color-blue);
-            transition: width 0.3s ease;
-            box-shadow: 0 0 10px var(--color-blue);
-        }
-
-        .loading-text {
-            color: var(--text-muted);
-            font-size: 0.9rem;
-            font-family: monospace;
-        }
-
-        /* VIEW: ERROR / NO DATA */
-        #view-error {
-            display: none;
-            width: 100%;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            margin: auto;
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        #view-error svg {
-            color: var(--color-yellow);
-            margin-bottom: 1rem;
-        }
-
-        /* VIEW: RESULTS */
+        /* ── RESULTS VIEW ── */
         #view-results {
-            display: none;
-            width: 100%;
-            animation: fadeIn 0.5s ease-out;
+            gap: 1rem;
+            padding-top: 1.25rem;
         }
 
-        /* Top Result Banner */
-        .result-banner {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 2rem;
+        /* Verdict Banner */
+        .verdict-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
             display: flex;
             align-items: center;
-            gap: 2rem;
-            margin-bottom: 1.5rem;
+            gap: 1.25rem;
             position: relative;
+            overflow: hidden;
         }
 
-        .result-icon-wrapper {
-            width: 100px;
-            height: 100px;
+        .verdict-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+        }
+
+        .verdict-card.safe::before { background: var(--green); }
+        .verdict-card.warn::before { background: var(--yellow); }
+        .verdict-card.danger::before { background: var(--red); }
+
+        .verdict-orb {
+            width: 68px;
+            height: 68px;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: grid;
+            place-items: center;
             flex-shrink: 0;
-            background-color: var(--color-green-bg);
-            border: 8px solid rgba(255,255,255,0.02);
-        }
-
-        .result-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--color-green);
-            display: flex;
-            align-items: center;
-            justify-content: center;
             color: #000;
         }
 
-        .result-content {
-            flex: 1;
-        }
+        .verdict-card.safe .verdict-orb { background: var(--green); box-shadow: 0 0 24px rgba(0,230,118,0.3); }
+        .verdict-card.warn .verdict-orb { background: var(--yellow); box-shadow: 0 0 24px rgba(255,234,0,0.3); }
+        .verdict-card.danger .verdict-orb { background: var(--red); box-shadow: 0 0 24px rgba(255,23,68,0.3); }
 
-        .result-tag {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.7rem;
+        .verdict-body { flex: 1; min-width: 0; }
+
+        .verdict-tag {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            letter-spacing: 2px;
             font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            padding: 3px 10px;
+            border-radius: 20px;
             border: 1px solid;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
+            display: inline-block;
+            margin-bottom: 6px;
         }
 
-        .result-title {
-            font-size: 2.5rem;
+        .verdict-card.safe .verdict-tag { color: var(--green); border-color: var(--green); }
+        .verdict-card.warn .verdict-tag { color: var(--yellow); border-color: var(--yellow); }
+        .verdict-card.danger .verdict-tag { color: var(--red); border-color: var(--red); }
+
+        .verdict-label {
+            font-size: 1.8rem;
             font-weight: 900;
             text-transform: uppercase;
-            margin-bottom: 0.5rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            letter-spacing: -0.5px;
+            line-height: 1;
+            margin-bottom: 6px;
         }
 
-        .result-desc {
+        .verdict-desc {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            font-size: 1rem;
-            max-width: 90%;
             line-height: 1.5;
+            font-weight: 400;
         }
 
-        .result-actions {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
+        .verdict-meta {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            gap: 1rem;
+            gap: 8px;
+            flex-shrink: 0;
         }
 
-        .hash-id {
-            font-family: monospace;
-            font-size: 0.7rem;
-            color: var(--text-dark);
-            background: rgba(0,0,0,0.3);
-            padding: 4px 10px;
+        .hash-tag {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            background: rgba(0,0,0,0.4);
+            padding: 4px 8px;
             border-radius: 4px;
         }
 
-        .action-btns {
+        .btn-new {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            padding: 8px 14px;
+            border-radius: var(--radius-sm);
+            font-family: var(--font-mono);
+            font-size: 0.65rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-new:hover { color: var(--text); border-color: var(--border-bright); }
+
+        /* Metrics Strip */
+        .metrics-strip {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.75rem;
+        }
+
+        @media (min-width: 600px) {
+            .metrics-strip { grid-template-columns: repeat(4, 1fr); }
+        }
+
+        .metric-tile {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 0.5rem;
         }
 
-        .btn-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-icon:hover {
-            color: var(--text-main);
-            border-color: var(--text-muted);
-        }
-
-        /* Metrics Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .metric-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .metric-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-
-        .metric-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            border: 1px solid var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-        }
-
-        .metric-title {
-            color: var(--text-muted);
-            font-size: 0.75rem;
-            font-weight: 700;
+        .metric-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 1px;
+            color: var(--text-dim);
         }
 
         .metric-value {
-            font-size: 2.5rem;
+            font-size: 2rem;
             font-weight: 900;
-            margin-bottom: 0.25rem;
             line-height: 1;
         }
 
         .metric-sub {
-            color: var(--text-dark);
-            font-size: 0.75rem;
-            font-weight: 600;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+        }
+
+        /* AI Summary Box */
+        .ai-summary {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .section-label {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
             text-transform: uppercase;
-        }
-
-        /* Layout Inferior (2 Colunas) */
-        .results-layout {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-
-        .section-header {
+            letter-spacing: 2px;
+            color: var(--text-dim);
+            margin-bottom: 1rem;
             display: flex;
             align-items: center;
             gap: 8px;
-            margin-bottom: 1.5rem;
-            font-size: 0.9rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .section-dot {
+        .section-label::before {
+            content: '';
             width: 8px;
             height: 8px;
             border-radius: 50%;
-            background-color: #60a5fa;
+            background: var(--accent);
+            flex-shrink: 0;
         }
 
-        /* Lista de Fontes (Esquerda) */
-        .sources-list {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .source-card {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            transition: transform 0.2s;
-        }
-
-        .source-card:hover {
-            border-color: var(--border-light);
-        }
-
-        .source-card.origin-card {
-            border-color: rgba(59, 130, 246, 0.5);
-            background-color: rgba(59, 130, 246, 0.05);
-        }
-
-        .source-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+        .ai-diagnosis-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
             margin-bottom: 1rem;
         }
 
-        .source-type {
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 0.65rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .diag-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.75rem;
         }
 
-        .type-oficial { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
-        .type-imprensa { background: rgba(156, 163, 175, 0.15); color: #9ca3af; border: 1px solid rgba(156, 163, 175, 0.3); }
-        .type-blog { background: rgba(234, 179, 8, 0.15); color: #fbbf24; border: 1px solid rgba(234, 179, 8, 0.3); }
-        .type-checagem { background: rgba(34, 197, 94, 0.15); color: #4ade80; border: 1px solid rgba(34, 197, 94, 0.3); }
-        .type-analisada { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .diag-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+        }
+
+        .diag-info h5 {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 2px;
+        }
+
+        .diag-info p {
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-muted);
+        }
+
+        .ai-conclusion {
+            background: var(--surface2);
+            border: 1px solid var(--accent-mid);
+            border-radius: var(--radius-sm);
+            padding: 0.9rem 1rem;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .ai-conclusion strong { color: var(--accent); }
+
+        /* Sources */
+        .sources-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .sources-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .source-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .source-card:hover { border-color: var(--border-bright); }
+        .source-card.origin-card { border-color: rgba(0,229,255,0.3); }
+
+        .source-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.6rem;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .type-badge {
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            padding: 3px 9px;
+            border-radius: 4px;
+        }
+
+        .type-oficial { background: rgba(0,229,255,0.12); color: #00e5ff; border: 1px solid rgba(0,229,255,0.3); }
+        .type-imprensa { background: rgba(150,160,180,0.1); color: #8896a8; border: 1px solid rgba(150,160,180,0.2); }
+        .type-blog { background: rgba(255,234,0,0.1); color: #ffe033; border: 1px solid rgba(255,234,0,0.25); }
+        .type-checagem { background: rgba(0,230,118,0.1); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+        .type-analisada { background: rgba(255,23,68,0.1); color: #ff4d6a; border: 1px solid rgba(255,23,68,0.25); }
 
         .source-date {
-            font-family: monospace;
-            font-size: 0.75rem;
-            color: var(--text-dark);
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
         }
 
         .source-title {
-            font-size: 1rem;
-            font-weight: 800;
-            margin-bottom: 0.75rem;
+            font-size: 0.82rem;
+            font-weight: 700;
             text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 0.5rem;
+            line-height: 1.3;
         }
 
-        .source-text {
+        .source-excerpt {
+            font-size: 0.8rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
-            margin-bottom: 1.5rem;
+            line-height: 1.55;
+            margin-bottom: 0.9rem;
+            font-weight: 400;
         }
 
-        .source-bottom {
+        .source-foot {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 1rem;
         }
 
-        .confidence-area {
+        .conf-bar-wrap {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 8px;
             flex: 1;
         }
 
-        .confidence-bar-bg {
-            height: 4px;
-            width: 150px;
-            background-color: var(--bg-card);
+        .conf-track {
+            flex: 1;
+            height: 3px;
+            background: rgba(255,255,255,0.07);
             border-radius: 2px;
+            overflow: hidden;
+            max-width: 100px;
+        }
+
+        .conf-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.6s ease;
+        }
+
+        .conf-label {
+            font-family: var(--font-mono);
+            font-size: 0.58rem;
+            color: var(--text-dim);
+            white-space: nowrap;
+        }
+
+        .btn-source-link {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            display: grid;
+            place-items: center;
+            text-decoration: none;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-source-link:hover { color: var(--text); border-color: var(--border-bright); }
+
+        /* Timeline */
+        .timeline-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
             overflow: hidden;
         }
 
-        .confidence-bar-fill {
-            height: 100%;
-            border-radius: 2px;
-        }
-
-        .confidence-label {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--text-dark);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .btn-go {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-muted);
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-go:hover {
-            color: var(--text-main);
-            border-color: var(--text-main);
-        }
-
-        /* Mapeamento Espectral (Direita) */
-        .spectral-panel {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-        }
-
-        .spectral-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: var(--text-muted);
-        }
-
-        .live-tag {
-            color: var(--color-blue);
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .chart-area {
-            height: 120px;
-            display: flex;
-            align-items: flex-end;
-            justify-content: space-between;
-            padding-bottom: 10px;
-            border-bottom: 1px dashed var(--border-light);
-            position: relative;
-        }
-
-        .chart-dots {
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 10px;
-        }
-        .chart-dot {
-            width: 3px;
-            height: 3px;
-            background-color: var(--border-light);
-            border-radius: 50%;
-        }
-
-        .spectral-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .spectral-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .spectral-icon.eco { background-color: var(--color-green-dim); color: var(--color-green); }
-        .spectral-icon.rep { background-color: var(--color-blue-dim); color: var(--color-blue); }
-
-        .spectral-info h4 {
-            font-size: 0.85rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            margin-bottom: 2px;
-        }
-        .spectral-info p {
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-
-        .warning-box {
-            background-color: var(--bg-card);
-            border: 1px solid rgba(59, 130, 246, 0.3);
-            border-radius: 8px;
-            padding: 1rem;
-            display: flex;
-            gap: 1rem;
-            align-items: flex-start;
-            margin-top: 1rem;
-        }
-
-        .warning-box p {
-            font-size: 0.7rem;
-            color: #9ca3af;
-            line-height: 1.5;
-            text-transform: uppercase;
-            font-style: italic;
-        }
-
-        .warning-box p strong {
-            color: #60a5fa;
-        }
-
-        /* TIMELINE DA INFORMAÇÃO */
-        .timeline-section {
-            background-color: var(--bg-panel);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1.5rem;
-            width: 100%;
+        .timeline-scroll {
             overflow-x: auto;
+            padding-bottom: 0.75rem;
+            -webkit-overflow-scrolling: touch;
         }
 
-        .timeline-container {
+        .timeline-scroll::-webkit-scrollbar { height: 3px; }
+        .timeline-scroll::-webkit-scrollbar-track { background: var(--border); border-radius: 2px; }
+        .timeline-scroll::-webkit-scrollbar-thumb { background: var(--accent-mid); border-radius: 2px; }
+
+        .timeline-inner {
             display: flex;
             align-items: flex-start;
-            justify-content: space-between;
+            gap: 0;
             position: relative;
-            padding: 2rem 0 1rem 0;
-            min-width: 800px;
+            padding: 2rem 1rem 1rem;
+            min-width: 560px;
         }
 
-        .timeline-container::before {
+        .timeline-inner::before {
             content: '';
             position: absolute;
-            top: 47px; 
-            left: 50px;
-            right: 50px;
-            height: 2px;
-            background-color: var(--border-light);
-            z-index: 1;
+            top: 42px;
+            left: 2rem;
+            right: 2rem;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--border-bright), transparent);
         }
 
-        .timeline-node {
+        .tl-node {
             flex: 1;
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 6px;
             position: relative;
             z-index: 2;
             text-align: center;
-            padding: 0 10px;
         }
 
-        .node-date {
-            font-size: 0.65rem;
-            font-family: monospace;
-            color: var(--text-dark);
-            margin-bottom: 8px;
+        .tl-date {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
+            color: var(--text-dim);
         }
 
-        .node-icon {
-            width: 32px;
-            height: 32px;
+        .tl-icon {
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
-            background-color: var(--bg-card);
-            border: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 12px;
-            color: var(--text-muted);
-            transition: var(--transition);
+            background: var(--surface2);
+            border: 2px solid var(--border);
+            display: grid;
+            place-items: center;
+            color: var(--text-dim);
+            transition: all 0.2s;
         }
 
-        .node-icon.origin {
-            border-color: var(--color-red);
-            color: var(--color-red);
-            box-shadow: 0 0 10px var(--color-red-dim);
-        }
-        
-        .node-icon.analyzed {
-            border-color: var(--color-blue);
-            color: var(--color-blue);
-            box-shadow: 0 0 10px var(--color-blue-dim);
-        }
+        .tl-icon.origin { border-color: var(--red); color: var(--red); box-shadow: 0 0 10px var(--red-dim); }
+        .tl-icon.analyzed { border-color: var(--accent); color: var(--accent); box-shadow: 0 0 10px var(--accent-dim); }
+        .tl-icon.safe { border-color: var(--green); color: var(--green); }
 
-        .node-icon.safe {
-            border-color: var(--color-green);
-            color: var(--color-green);
-        }
-
-        .node-type {
-            font-size: 0.6rem;
-            font-weight: 800;
+        .tl-badge {
+            font-family: var(--font-mono);
+            font-size: 0.55rem;
             text-transform: uppercase;
-            padding: 2px 8px;
-            border-radius: 4px;
-            margin-bottom: 6px;
+            padding: 2px 6px;
+            border-radius: 3px;
         }
 
-        .node-title {
-            font-size: 0.75rem;
+        .tl-title {
+            font-size: 0.65rem;
             color: var(--text-muted);
-            max-width: 140px;
-            white-space: nowrap;
+            max-width: 90px;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        /* FOOTER */
+        /* Suggestions Section (NEW!) */
+        .suggestions-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 1.25rem;
+        }
+
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+
+        .suggestion-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem;
+        }
+
+        .sug-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: grid;
+            place-items: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .sug-text {
+            flex: 1;
+        }
+
+        .sug-title {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            margin-bottom: 3px;
+        }
+
+        .sug-desc {
+            font-size: 0.74rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-weight: 400;
+        }
+
+        /* ── FOOTER ── */
         footer {
-            padding: 2rem 3rem;
-            border-top: 1px solid var(--border-color);
+            border-top: 1px solid var(--border);
+            padding: 1.25rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            background-color: var(--bg-main);
-            margin-top: 2rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            font-family: var(--font-mono);
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            position: relative;
+            z-index: 1;
         }
 
-        .footer-links {
+        .footer-pills {
             display: flex;
-            gap: 2rem;
-            text-transform: uppercase;
-            font-weight: 600;
+            gap: 0.75rem;
+            flex-wrap: wrap;
         }
 
-        .footer-links span {
-            cursor: pointer;
-        }
-        .footer-links span:hover {
-            color: var(--text-main);
-        }
-
-        /* UTILS & ANIMATIONS */
-        @keyframes pulse-blue {
-            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+        .footer-pill {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--text-dim);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        .footer-pill::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--green);
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .text-green { color: var(--color-green-light); }
-        .text-yellow { color: var(--color-yellow); }
-        .text-red { color: var(--color-red); }
+        .view.active { animation: fadeSlide 0.4s ease-out; }
 
-        /* Responsividade */
-        @media (max-width: 1024px) {
-            .results-layout { grid-template-columns: 1fr; }
-            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        /* ── RESPONSIVE ADJUSTMENTS ── */
+        @media (max-width: 480px) {
+            .verdict-meta { display: none; }
+            .verdict-card { flex-direction: row; }
+            .verdict-label { font-size: 1.4rem; }
+            .ai-diagnosis-grid { grid-template-columns: 1fr; }
+            .metrics-strip { grid-template-columns: 1fr 1fr; }
         }
-        @media (max-width: 768px) {
-            header { flex-direction: column; gap: 1rem; padding: 1rem; }
-            .nav-right { flex-direction: column; gap: 1rem; }
-            h1 { font-size: 2rem; }
-            .search-box { flex-direction: column; background: transparent; border: none; gap: 10px; }
-            .search-input { background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; padding: 12px; width: 100%; }
-            .btn-analyze { padding: 12px; justify-content: center; }
-            .result-banner { flex-direction: column; text-align: center; }
-            .result-actions { position: relative; top: 0; right: 0; flex-direction: row; width: 100%; justify-content: space-between; margin-top: 1rem; }
-            .action-btns { flex-direction: row; }
-            .metrics-grid { grid-template-columns: 1fr; }
-            .source-bottom { flex-direction: column; align-items: flex-start; gap: 1rem; }
+
+        @media (min-width: 640px) {
+            main { padding: 0 1.5rem 5rem; }
+            header { padding: 0 2rem; }
+            #view-home { padding-top: 5rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- CABEÇALHO -->
-    <header>
-        <div class="logo-container" onclick="resetApp()">
-            <div class="logo-icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="7.5 4.21 12 6.81 16.5 4.21"></polyline><polyline points="7.5 19.79 7.5 14.6 3 12"></polyline><polyline points="21 12 16.5 14.6 16.5 19.79"></polyline><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-            </div>
-            <div class="logo-text">FILTRO DIGITAL<span>OS 1.0 (IA GEMINI ATIVA)</span></div>
+<!-- HEADER -->
+<header>
+    <div class="logo" onclick="resetApp()">
+        <div class="logo-mark">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
         </div>
-        <div class="nav-right">
-            <div class="status-badge">
-                <div class="status-dot"></div>
-                LEITOR DE LINKS & IA ATIVOS
-            </div>
-            <nav class="nav-links">
-                <a href="#" class="active" onclick="resetApp()">PAINEL</a>
-            </nav>
+        <div>
+            <div class="logo-name">Filtro Digital</div>
+            <div class="logo-version">v2.0 · GEMINI IA</div>
         </div>
-    </header>
+    </div>
+    <div class="header-status">
+        <div class="pulse-dot"></div>
+        IA ATIVA
+    </div>
+</header>
 
-    <!-- ÁREA PRINCIPAL -->
-    <main>
-        
-        <!-- TELA 1: BUSCA / HOME -->
-        <div id="view-home">
-            <div class="top-badge">MONITORAMENTO DE INTEGRIDADE DIGITAL COM IA</div>
-            
-            <h1>DETECÇÃO <span class="highlight">AVANÇADA</span> DE<br>DESINFORMAÇÃO</h1>
-            
-            <p class="subtitle">
-                O FILTRO DIGITAL 1.0 LÊ LINKS DE NOTÍCIAS OU TEMAS, EXTRAI O TEXTO, BUSCA FONTES REAIS NA WEB E UTILIZA A <b>INTELIGÊNCIA ARTIFICIAL DO GOOGLE</b> PARA ANALISAR VERACIDADE E VIESES.
-            </p>
+<!-- MAIN -->
+<main>
 
+    <!-- VIEW: HOME -->
+    <div id="view-home" class="view active">
+        <div class="hero-badge">🛡️ Monitoramento de Desinformação com IA</div>
+
+        <h1 class="hero-title">
+            Detecte<br><span class="accent">Fake News</span><br>Agora
+        </h1>
+
+        <p class="hero-sub">
+            Cole um link de notícia ou digite um tema. A IA analisa fontes reais da internet, detecta vieses e identifica padrões de desinformação.
+        </p>
+
+        <div class="search-wrapper">
             <div class="search-box">
-                <div class="search-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <div class="search-input-row">
+                    <div class="search-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <input type="text" id="mainInput" class="search-input"
+                        placeholder="Cole um link ou pesquise um tema..."
+                        autocomplete="off" autocorrect="off" spellcheck="false">
+                    <button class="btn-analyze" onclick="startAnalysis()">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                        Analisar
+                    </button>
                 </div>
-                <!-- Input atualizado com dica de colar URL -->
-                <input type="text" id="mainInput" class="search-input" placeholder="Pesquise um tema real ou cole o link de uma notícia (http://...)" autocomplete="off">
-                <button class="btn-analyze" onclick="startAnalysis()">
-                    ANALISAR
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                <div class="search-hint">↩ Enter para analisar · Suporta links HTTP e termos de busca</div>
+            </div>
+        </div>
+
+        <div class="feature-pills">
+            <span class="pill">🔗 Leitura de Links</span>
+            <span class="pill">🧠 Google Gemini</span>
+            <span class="pill">📰 Wikipedia Cruzada</span>
+            <span class="pill">🤖 Detecção de Bots</span>
+            <span class="pill">📡 Câmara de Eco</span>
+        </div>
+
+        <div class="how-grid">
+            <div class="how-card">
+                <div class="how-num">01</div>
+                <div class="how-text">
+                    <h4>Extração de Conteúdo</h4>
+                    <p>Lemos o site colado e extraímos o texto real via proxy seguro.</p>
+                </div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">02</div>
+                <div class="how-text">
+                    <h4>Cruzamento de Fontes</h4>
+                    <p>Comparamos com fontes confiáveis da web para identificar divergências.</p>
+                </div>
+            </div>
+            <div class="how-card">
+                <div class="how-num">03</div>
+                <div class="how-text">
+                    <h4>Veredito da IA</h4>
+                    <p>O Gemini analisa viés emocional, bots e padrões de desinformação.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VIEW: LOADING -->
+    <div id="view-loading" class="view">
+        <div class="loading-icon"></div>
+        <div class="loading-title">Gemini Processando</div>
+        <div class="loading-step" id="loadingStep">Iniciando varredura...</div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+        <div class="steps-log" id="stepsLog"></div>
+    </div>
+
+    <!-- VIEW: ERROR -->
+    <div id="view-error" class="view">
+        <div class="error-icon">
+            <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="error-title" id="errorTitle">Erro na Análise</div>
+        <p class="error-desc" id="errorDesc">Algo deu errado. Tente novamente.</p>
+        <button class="btn-retry" onclick="resetApp()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.1"/></svg>
+            Tentar novamente
+        </button>
+    </div>
+
+    <!-- VIEW: RESULTS -->
+    <div id="view-results" class="view">
+
+        <!-- Verdict Banner -->
+        <div class="verdict-card" id="verdictCard">
+            <div class="verdict-orb" id="verdictOrb">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+            </div>
+            <div class="verdict-body">
+                <div class="verdict-tag" id="verdictTag">VERIFICANDO</div>
+                <div class="verdict-label" id="verdictLabel">—</div>
+                <div class="verdict-desc" id="verdictDesc">Processando análise...</div>
+            </div>
+            <div class="verdict-meta">
+                <div class="hash-tag" id="hashId">HASH: #00000</div>
+                <button class="btn-new" onclick="resetApp()">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Nova análise
                 </button>
             </div>
         </div>
 
-        <!-- TELA 2: CARREGAMENTO -->
-        <div id="view-loading">
-            <h2 style="color: #60a5fa; display: flex; align-items: center; justify-content: center; gap: 10px;">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
-                Google Gemini Processando...
-            </h2>
-            <p class="subtitle" style="margin-bottom: 1rem; margin-top: 0.5rem;" id="loadingSubtext">Conectando aos servidores de dados...</p>
-            
-            <div class="loader-container">
-                <div class="progress-bar-bg">
-                    <div class="progress-bar-fill" id="progressBar"></div>
-                </div>
-                <div class="loading-text" id="loadingText">Preparando varredura...</div>
+        <!-- Metrics -->
+        <div class="metrics-strip">
+            <div class="metric-tile">
+                <div class="metric-label">Fontes</div>
+                <div class="metric-value" id="metricSources" style="color:var(--accent)">—</div>
+                <div class="metric-sub">Únicas na web</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Diversidade</div>
+                <div class="metric-value" id="metricDiversity">—</div>
+                <div class="metric-sub" id="metricDiversitySub">—</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Cópias</div>
+                <div class="metric-value" id="metricDuplicates">—</div>
+                <div class="metric-sub">Padrão de bot</div>
+            </div>
+            <div class="metric-tile">
+                <div class="metric-label">Viés IA</div>
+                <div class="metric-value" id="metricBias">—</div>
+                <div class="metric-sub" id="metricBiasSub">—</div>
             </div>
         </div>
 
-        <!-- TELA DE ERRO (NO DATA) -->
-        <div id="view-error">
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <h2 id="errorTitle">Falha na Coleta</h2>
-            <p class="subtitle" style="margin-top: 1rem;" id="errorDesc">O termo pesquisado não gerou resultados suficientes ou o link colado está protegido contra leitura automática.</p>
-            <button class="btn-analyze" style="margin-top: 2rem;" onclick="resetApp()">TENTAR NOVAMENTE</button>
-        </div>
+        <!-- AI Summary -->
+        <div class="ai-summary">
+            <div class="section-label">Diagnóstico da Inteligência Artificial</div>
 
-        <!-- TELA 3: RESULTADOS -->
-        <div id="view-results">
-            
-            <!-- Banner Principal -->
-            <div class="result-banner" id="statusBanner">
-                <div class="result-icon-wrapper" id="statusIconWrapper">
-                    <div class="result-icon" id="statusIcon">
-                        <!-- Icon SVG -->
+            <div class="ai-diagnosis-grid">
+                <div class="diag-item">
+                    <div class="diag-icon" id="echoIcon" style="background:var(--green-dim); color:var(--green);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                    </div>
+                    <div class="diag-info">
+                        <h5>Câmara de Eco</h5>
+                        <p id="echoStatus">Verificando...</p>
                     </div>
                 </div>
-                
-                <div class="result-content">
-                    <div class="result-tag" id="statusTag">IA GEMINI: AVALIAÇÃO DE CONFIABILIDADE</div>
-                    <div class="result-title">CONTEÚDO <span id="statusTitleHighlight" class="text-green">CONFIÁVEL</span></div>
-                    <p class="result-desc" id="statusDesc">A informação está em sites confiáveis e não há índice de bots ou fake news.</p>
-                </div>
-
-                <div class="result-actions">
-                    <div class="hash-id" id="hashId">HASH: #12621</div>
-                    <div class="action-btns">
-                        <button class="btn-icon" title="Nova Análise" onclick="resetApp()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-                        </button>
+                <div class="diag-item">
+                    <div class="diag-icon" id="botIcon" style="background:var(--accent-dim); color:var(--accent);">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </div>
+                    <div class="diag-info">
+                        <h5>Padrão de Bots</h5>
+                        <p id="botStatus">Verificando...</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Dashboard Grid -->
-            <div class="metrics-grid">
-                <!-- Card 1 -->
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
-                        </div>
-                        <span class="metric-title">Índice de Diversidade</span>
-                    </div>
-                    <div class="metric-value" id="metricSources">0</div>
-                    <div class="metric-sub" id="metricSourcesSub">Fontes Únicas (Web)</div>
-                </div>
-                <!-- Card 2 -->
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                        </div>
-                        <span class="metric-title">Identidade de Grupo</span>
-                    </div>
-                    <div class="metric-value" id="metricDiversity">100%</div>
-                    <div class="metric-sub" id="metricDiversitySub">Várias Interpretações</div>
-                </div>
-                <!-- Card 3 -->
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                        </div>
-                        <span class="metric-title">Cópia Detectada</span>
-                    </div>
-                    <div class="metric-value" id="metricDuplicates">0</div>
-                    <div class="metric-sub" id="metricDuplicatesSub">Padrão Bot (IA)</div>
-                </div>
-                <!-- Card 4 -->
-                <div class="metric-card">
-                    <div class="metric-header">
-                        <div class="metric-icon">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                        </div>
-                        <span class="metric-title">Viés Emocional (IA)</span>
-                    </div>
-                    <div class="metric-value" id="metricBias">Baixo</div>
-                    <div class="metric-sub" id="metricBiasSub">0% de Intensidade</div>
-                </div>
+            <div class="ai-conclusion">
+                <p id="aiConclusionText"><strong>RESUMO DA IA:</strong> Aguardando processamento...</p>
             </div>
-
-            <!-- Colunas Inferiores -->
-            <div class="results-layout">
-                <!-- Esquerda: Fontes -->
-                <div>
-                    <div class="section-header">
-                        <div class="section-dot"></div>
-                        Textos Reais Extraídos da Web (Base para IA)
-                    </div>
-                    <div class="sources-list" id="sourcesList">
-                        <!-- Cards injetados via JS -->
-                    </div>
-                </div>
-
-                <!-- Direita: Espectral / Bots -->
-                <div>
-                    <div class="section-header">
-                        <div class="section-dot"></div>
-                        Diagnóstico da Inteligência Artificial
-                    </div>
-                    <div class="spectral-panel">
-                        <div class="spectral-header">
-                            <span>Status de Propagação (Bots)</span>
-                            <span class="live-tag">
-                                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10"></circle></svg>
-                                LIVE GEMINI
-                            </span>
-                        </div>
-                        
-                        <div class="chart-area">
-                            <div class="chart-dots">
-                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
-                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
-                                <div class="chart-dot"></div><div class="chart-dot"></div><div class="chart-dot"></div>
-                            </div>
-                        </div>
-
-                        <div class="spectral-item">
-                            <div class="spectral-icon eco" id="specEcoIcon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                            </div>
-                            <div class="spectral-info">
-                                <h4>Coesão de Informação</h4>
-                                <p id="specEcoStatus">Consenso Sólido (Orgânico)</p>
-                            </div>
-                        </div>
-
-                        <div class="spectral-item">
-                            <div class="spectral-icon rep" id="specRepIcon">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
-                            </div>
-                            <div class="spectral-info">
-                                <h4>Padrão Artificial / Bots</h4>
-                                <p id="specRepStatus">Nenhuma replicação em massa</p>
-                            </div>
-                        </div>
-
-                        <div class="warning-box">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0; margin-top:2px;"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-                            <p id="nlpWarningText"><strong>RESUMO DA IA:</strong> Aguardando processamento da linguagem natural...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LINHA DO TEMPO -->
-            <div class="timeline-section">
-                <div class="section-header">
-                    <div class="section-dot"></div>
-                    Linha do Tempo: Onde a informação começou
-                </div>
-                <div class="timeline-container" id="timelineContainer">
-                    <!-- Nodes injetados via JS -->
-                </div>
-            </div>
-
         </div>
 
-    </main>
-
-    <!-- RODAPÉ -->
-    <footer>
-        <div class="footer-left">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; margin-right:5px; vertical-align:middle;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>
-            © 2026 FILTRO DIGITAL. MOTOR DE IA GEMINI ATIVO.
+        <!-- Sources -->
+        <div class="sources-section">
+            <div class="section-label">Fontes Reais Extraídas da Web</div>
+            <div class="sources-list" id="sourcesList"></div>
         </div>
-        <div class="footer-links">
-            <span>DADOS REAIS</span>
-            <span>CORS BYPASS</span>
-            <span>GOOGLE GEMINI API</span>
+
+        <!-- Timeline -->
+        <div class="timeline-section">
+            <div class="section-label">Linha do Tempo da Informação</div>
+            <div class="timeline-scroll">
+                <div class="timeline-inner" id="timelineContainer"></div>
+            </div>
         </div>
-    </footer>
 
-    <!-- ========================================== -->
-    <!-- LÓGICA DO SISTEMA (JS) - WEB + GEMINI IA   -->
-    <!-- ========================================== -->
-    <script>
-        // --- 1. CONFIGURAÇÕES BASE ---
-        
-        // Chave do Gemini (Fornecida automaticamente pelo ambiente ou inserida pelo professor no futuro)
-        const apiKey = "AIzaSyDOfjXlsdO9-X1Ng1FvnrPU5KUF9b0ab6Y"; 
+        <!-- Suggestions (NEW FEATURE!) -->
+        <div class="suggestions-section" id="suggestionsSection">
+            <div class="section-label">💡 Sugestões para Aprofundar a Pesquisa</div>
+            <div class="suggestion-list" id="suggestionList"></div>
+        </div>
 
-        const CATEGORIES = {
-            'imprensa': 'Imprensa Tradicional',
-            'oficial': 'Órgãos Oficiais',
-            'blog': 'Blogs Independentes',
-            'checagem': 'Agência de Checagem',
-            'analisada': 'Link Analisado (Sua Busca)'
-        };
+    </div>
 
-        const views = {
-            home: document.getElementById('view-home'),
-            loading: document.getElementById('view-loading'),
-            results: document.getElementById('view-results'),
-            error: document.getElementById('view-error')
-        };
+</main>
 
-        function showView(viewName) {
-            Object.values(views).forEach(v => v.style.display = 'none');
-            views[viewName].style.display = 'flex';
-            if(viewName !== 'home' && viewName !== 'error') views[viewName].style.flexDirection = 'column';
+<!-- FOOTER -->
+<footer>
+    <span>© 2026 FILTRO DIGITAL · MOTOR GEMINI ATIVO</span>
+    <div class="footer-pills">
+        <span class="footer-pill">DADOS REAIS</span>
+        <span class="footer-pill">CORS BYPASS</span>
+        <span class="footer-pill">GEMINI API</span>
+    </div>
+</footer>
+
+<script>
+// ── CONFIGURAÇÕES ──
+const apiKey = "AIzaSyDOfjXlsdO9-X1Ng1FvnrPU5KUF9b0ab6Y";
+
+const CATEGORIES = {
+    'imprensa': 'Imprensa',
+    'oficial': 'Oficial',
+    'blog': 'Blog',
+    'checagem': 'Checagem',
+    'analisada': 'Link Analisado'
+};
+
+// ── VIEW MANAGER ──
+function showView(name) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + name).classList.add('active');
+}
+
+function resetApp() {
+    document.getElementById('mainInput').value = '';
+    showView('home');
+}
+
+document.getElementById('mainInput').addEventListener('keypress', e => {
+    if (e.key === 'Enter') startAnalysis();
+});
+
+// ── PROGRESS ──
+let steps = [];
+function logStep(text, state = 'active') {
+    const log = document.getElementById('stepsLog');
+    // Mark previous active as done
+    const prev = log.querySelector('.step-line.active');
+    if (prev) prev.classList.replace('active', 'done');
+    const el = document.createElement('div');
+    el.className = `step-line ${state}`;
+    el.textContent = `${state === 'done' ? '✓' : '›'} ${text}`;
+    log.appendChild(el);
+    document.getElementById('loadingStep').textContent = text;
+}
+
+function setProgress(pct) {
+    document.getElementById('progressBar').style.width = pct + '%';
+}
+
+// ── UTILS ──
+function stripHtml(str) {
+    return str ? str.replace(/<[^>]*>/g, '') : '';
+}
+
+function randomHash() {
+    return '#' + Math.floor(10000 + Math.random() * 90000);
+}
+
+// ── GEMINI: EXTRACT TOPIC ──
+async function extractTopicWithGemini(text) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const prompt = `Resuma este texto em no máximo 4 palavras-chave em português, identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
+    const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+    });
+    const data = await res.json();
+    return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+}
+
+// ── GEMINI: ANALYZE ──
+async function analyzeWithGemini(snippets, topic) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const prompt = `Você é um sistema profissional de detecção de desinformação. Analise os trechos abaixo sobre o tema "${topic}".
+[Fonte 1] é o conteúdo fornecido pelo usuário. As demais são fontes cruzadas da web.
+
+Avalie:
+1. Linguagem emocional ou enviesada
+2. Câmara de eco (fontes não diversas ecoando mesma narrativa duvidosa)
+3. Cópias idênticas (padrão bot)
+4. Conclusão de 1 frase direta sobre confiabilidade
+
+Textos:
+${snippets.map((s, i) => `[Fonte ${i + 1}]: ${s}`).join('\n\n')}`;
+
+    const payload = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+                type: "OBJECT",
+                properties: {
+                    biasLevel: { type: "STRING" },
+                    biasIntensity: { type: "INTEGER" },
+                    echoChamberDetected: { type: "BOOLEAN" },
+                    botReplicationDetected: { type: "BOOLEAN" },
+                    duplicateCount: { type: "INTEGER" },
+                    aiConclusion: { type: "STRING" }
+                }
+            }
         }
+    };
 
-        document.getElementById('mainInput').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') startAnalysis();
-        });
-
-        function resetApp() {
-            document.getElementById('mainInput').value = '';
-            showView('home');
-        }
-
-        function stripHtmlTags(str) {
-            if ((str === null) || (str === '')) return false;
-            else str = str.toString();
-            return str.replace(/<[^>]*>/g, '');
-        }
-
-        // --- 2. COMUNICAÇÃO COM A IA E PROXY (CORS BYPASS) ---
-
-        // Função que usa a IA para ler um texto gigante de uma notícia e descobrir sobre o que é
-        async function extractTopicWithGemini(text) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-            const promptText = `Aja como um buscador. Resuma o seguinte texto em um termo de pesquisa de no máximo 4 palavras, identificando o assunto principal. Retorne APENAS as palavras chave, sem aspas, sem pontos e sem explicações.\n\nTexto: ${text.substring(0, 1500)}`;
-            
-            const response = await fetch(url, {
+    for (let i = 0; i < 6; i++) {
+        try {
+            const res = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ parts: [{ text: promptText }] }] })
+                body: JSON.stringify(payload)
             });
-            const data = await response.json();
-            return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            const data = await res.json();
+            const txt = data.candidates?.[0]?.content?.parts?.[0]?.text;
+            if (txt) return JSON.parse(txt);
+            throw new Error("Resposta vazia");
+        } catch (err) {
+            if (i === 5) throw err;
+            await new Promise(r => setTimeout(r, [1000, 2000, 4000, 8000, 16000][i]));
         }
+    }
+}
 
-        // Função que usa a IA para julgar a veracidade
-        async function analyzeWithGemini(snippets, topic) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+// ── MAIN FLOW ──
+async function startAnalysis() {
+    const input = document.getElementById('mainInput').value.trim();
+    if (!input) { alert("Insira um link ou tema para analisar."); return; }
 
-            const promptText = `
-                Você é um sistema de detecção de desinformação profissional. Analise os seguintes trechos de texto extraídos da internet. O tema da busca foi "${topic}".
-                A [Fonte 1] é o artigo principal fornecido pelo usuário. As outras fontes são da base de dados (Wikipedia/Web) para cruzamento de fatos.
-                
-                Instruções:
-                1. Avalie se a [Fonte 1] ou as demais possuem linguagem altamente emocional ou enviesada.
-                2. Avalie se há sinais de câmara de eco (quando fontes não diversificadas ecoam exatamente a mesma narrativa duvidosa da Fonte 1).
-                3. Avalie se os textos parecem ser cópia exata uns dos outros (Bots/Copia e Cola).
-                4. Forneça uma conclusão simples de 1 frase (aiConclusion) julgando a confiabilidade do tema.
+    document.getElementById('stepsLog').innerHTML = '';
+    showView('loading');
+    setProgress(5);
 
-                Textos extraídos:
-                ${snippets.map((s, i) => `[Fonte ${i+1}]: ${s}`).join('\n\n')}
-            `;
+    const isUrl = /^https?:\/\//i.test(input);
+    let searchTopic = input;
+    let originalArticleSource = null;
 
-            const payload = {
-                contents: [{ parts: [{ text: promptText }] }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            biasLevel: { type: "STRING", description: "Obrigatório: Retorne apenas 'Baixo', 'Médio' ou 'Alto'" },
-                            biasIntensity: { type: "INTEGER", description: "Número de 0 a 100 indicando a intensidade do viés" },
-                            echoChamberDetected: { type: "BOOLEAN" },
-                            botReplicationDetected: { type: "BOOLEAN" },
-                            duplicateCount: { type: "INTEGER", description: "Estimativa de quantos textos parecem cópias exatas" },
-                            aiConclusion: { type: "STRING", description: "Resumo curto e direto do diagnóstico." }
-                        }
-                    }
-                }
+    if (isUrl) {
+        logStep("Link detectado. Contornando CORS...");
+        setProgress(15);
+        try {
+            const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(input)}`;
+            const res = await fetch(proxyUrl);
+            if (!res.ok) throw new Error('Proxy falhou');
+            const data = await res.json();
+            const doc = new DOMParser().parseFromString(data.contents, 'text/html');
+            const title = doc.querySelector('title')?.textContent || 'Artigo Analisado';
+            const paragraphs = Array.from(doc.querySelectorAll('p'))
+                .map(p => p.textContent.trim())
+                .filter(t => t.length > 50)
+                .join(' ')
+                .substring(0, 2500);
+
+            if (!paragraphs) throw new Error("Nenhum texto encontrado.");
+
+            logStep("Extraindo tema central com IA...", 'active');
+            setProgress(35);
+            searchTopic = await extractTopicWithGemini(paragraphs);
+
+            originalArticleSource = {
+                id: 'origin', type: 'analisada', title, snippet: paragraphs.substring(0, 300) + "...", url: input
             };
-
-            const delays = [1000, 2000, 4000, 8000, 16000]; // Exponential backoff
-
-            for (let i = 0; i < 6; i++) {
-                try {
-                    const response = await fetch(url, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    const textResult = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                    if(textResult) return JSON.parse(textResult);
-                    throw new Error("Resposta vazia");
-                } catch (error) {
-                    if (i === 5) throw error;
-                    await new Promise(r => setTimeout(r, delays[i]));
-                }
-            }
+        } catch (e) {
+            showError("Link Bloqueado ou Inválido", "Não foi possível ler este link. Alguns sites bloqueiam a extração. Tente digitar o título da notícia.");
+            return;
         }
+    }
 
-        // --- 3. FLUXO DE BUSCA REAL (URL + IA + WIKI) ---
-        async function startAnalysis() {
-            const input = document.getElementById('mainInput').value.trim();
-            if (!input) {
-                alert("Por favor, insira um texto ou cole um link válido para iniciar a varredura.");
-                return;
-            }
+    logStep(`Buscando fontes cruzadas: "${searchTopic}"...`);
+    setProgress(50);
 
-            showView('loading');
-            const bar = document.getElementById('progressBar');
-            const txt = document.getElementById('loadingText');
-            const subTxt = document.getElementById('loadingSubtext');
-            
-            // Detecta se o usuário colou um Link (URL)
-            const isUrl = /^https?:\/\//i.test(input);
-            
-            let searchTopic = input;
-            let originalArticleSource = null;
+    let searchResults = [];
+    try {
+        const endpoint = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTopic)}&utf8=&format=json&origin=*`;
+        const res = await fetch(endpoint);
+        const data = await res.json();
+        searchResults = data.query.search || [];
+    } catch (err) {
+        showError("Falha de Conexão", "Não foi possível conectar aos servidores de dados públicos.");
+        return;
+    }
 
-            // Se for um link, vamos extrair o texto do site contornando o bloqueio CORS
-            if (isUrl) {
-                bar.style.width = '15%';
-                txt.innerText = "Link detectado. Realizando Bypass CORS...";
-                subTxt.innerText = "Extraindo código fonte da reportagem externa...";
+    if (!originalArticleSource && searchResults.length === 0) {
+        showError("Nenhum resultado", "O termo pesquisado não gerou dados suficientes. Tente um tema mais abrangente.");
+        return;
+    }
 
-                try {
-                    // Proxy gratuito para acessar sites sem erro de CORS
-                    const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(input)}`;
-                    const response = await fetch(proxyUrl);
-                    if (!response.ok) throw new Error('Falha no proxy');
-                    
-                    const data = await response.json();
-                    const html = data.contents;
+    const resultsToProcess = searchResults.slice(0, 5);
+    let snippetsForAI = [];
+    if (originalArticleSource) snippetsForAI.push(originalArticleSource.snippet);
+    resultsToProcess.forEach(item => snippetsForAI.push(stripHtml(item.snippet)));
 
-                    // Converter HTML para Texto e pegar parágrafos
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(html, 'text/html');
-                    const title = doc.title || "Artigo Externo";
-                    
-                    // Pega o texto dos parágrafos maiores (geralmente a notícia)
-                    const paragraphs = Array.from(doc.querySelectorAll('p'))
-                                            .map(p => p.textContent.trim())
-                                            .filter(t => t.length > 50)
-                                            .join(' ')
-                                            .substring(0, 2500); // Limite para não explodir a IA
+    logStep("Submetendo à IA Gemini para análise...");
+    setProgress(75);
 
-                    if (!paragraphs) throw new Error("Texto não encontrado no site.");
+    let geminiResult = null;
+    try {
+        geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
+    } catch (err) {
+        showError("Falha na IA", "Não foi possível processar com a IA Gemini. Verifique sua API Key.");
+        return;
+    }
 
-                    bar.style.width = '35%';
-                    txt.innerText = "Lendo artigo...";
-                    subTxt.innerText = "A IA está processando a notícia para descobrir o tema central.";
+    logStep("Construindo relatório final...", 'done');
+    setProgress(100);
 
-                    // Usa IA para descobrir o tema da notícia do cara
-                    searchTopic = await extractTopicWithGemini(paragraphs);
+    setTimeout(() => renderResults(searchTopic, resultsToProcess, geminiResult, originalArticleSource), 500);
+}
 
-                    // Salva a notícia para mostrar no painel depois
-                    originalArticleSource = {
-                        id: 'origin',
-                        type: 'analisada',
-                        title: title,
-                        snippet: paragraphs.substring(0, 300) + "...",
-                        url: input
-                    };
+function showError(title, desc) {
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorDesc').textContent = desc;
+    showView('error');
+}
 
-                } catch (e) {
-                    console.error(e);
-                    showError("Link Bloqueado ou Inválido", "Não foi possível extrair o texto deste link. Alguns sites bloqueiam raspagem de dados. Tente digitar o título da notícia em vez do link.");
-                    return;
-                }
-            }
+// ── RENDER ──
+function renderResults(searchTopic, realResults, ai, originalSource) {
+    const base = new Date();
+    const sources = [];
 
-            // Busca na Wikipedia cruzando com o termo (ou o tema extraído do link)
-            bar.style.width = '50%';
-            txt.innerText = `Consultando base de dados cruzada sobre: "${searchTopic}"...`;
-            subTxt.innerText = "Buscando fontes orgânicas na internet...";
+    if (originalSource) {
+        const d = new Date(base);
+        d.setDate(d.getDate() - 10);
+        sources.push({ ...originalSource, dateObj: d, date: d.toISOString().split('T')[0], text: originalSource.snippet, confidence: 100 - ai.biasIntensity, isOriginalLink: true });
+    }
 
-            const endpoint = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTopic)}&utf8=&format=json&origin=*`;
-            
-            let searchResults = [];
-            try {
-                const response = await fetch(endpoint);
-                const data = await response.json();
-                searchResults = data.query.search || [];
-            } catch (error) {
-                console.error("Erro Wiki:", error);
-                showError("Falha de Conexão Web", "Não foi possível conectar aos servidores de dados públicos da internet.");
-                return;
-            }
+    realResults.forEach((item, i) => {
+        let type = 'oficial';
+        if (i % 2 !== 0) type = 'imprensa';
+        if (ai.biasIntensity > 50 && i > 3) type = 'blog';
+        if (i === 1) type = 'checagem';
 
-            if (!originalArticleSource && searchResults.length === 0) {
-                showError("Nenhum dado real encontrado", "O termo pesquisado não gerou resultados suficientes na internet. Tente um tema mais abrangente.");
-                return;
-            }
+        let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
+        if (conf < 20) conf = 20;
 
-            // Preparar os textos que vão para a Inteligência Artificial julgar
-            const resultsToProcess = searchResults.slice(0, 5); // Pega as 5 melhores fontes
-            let snippetsForAI = [];
-            
-            // Se colou um link, ele será a [Fonte 1] para a IA comparar com o resto
-            if (originalArticleSource) {
-                snippetsForAI.push(originalArticleSource.snippet);
-            }
-            
-            // Adiciona as fontes da internet
-            resultsToProcess.forEach(item => {
-                snippetsForAI.push(stripHtmlTags(item.snippet));
-            });
+        const d = new Date(base);
+        d.setDate(d.getDate() - (i + 1));
 
-            // Analisar todos os textos com a IA Principal (Gemini)
-            bar.style.width = '75%';
-            txt.innerText = "Submetendo cruzamento à IA...";
-            subTxt.innerText = "A Inteligência Artificial está buscando vieses, câmaras de eco e cópias.";
+        sources.push({
+            id: item.pageid, type, title: `REFERÊNCIA: ${item.title}`,
+            dateObj: d, date: d.toISOString().split('T')[0],
+            text: stripHtml(item.snippet) + '...',
+            confidence: conf, url: `https://pt.wikipedia.org/?curid=${item.pageid}`, isOriginalLink: false
+        });
+    });
 
-            let geminiResult = null;
-            try {
-                geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
-            } catch (error) {
-                console.error("Erro Gemini:", error);
-                showError("Falha no Cérebro de IA", "Não foi possível processar a semântica dos textos com a IA. (Verifique sua API Key se estiver rodando fora do ambiente seguro).");
-                return;
-            }
+    sources.sort((a, b) => a.dateObj - b.dateObj);
 
-            // Passo final
-            bar.style.width = '100%';
-            txt.innerText = "Construindo relatório final...";
-            subTxt.innerText = "Concluído.";
+    // Verdict
+    let diversityPct = 100 - (ai.duplicateCount * 15);
+    if (ai.echoChamberDetected) diversityPct -= 20;
+    diversityPct = Math.max(0, Math.min(100, diversityPct));
 
-            setTimeout(() => {
-                processAndRender(searchTopic, resultsToProcess, geminiResult, originalArticleSource);
-            }, 500);
-        }
+    let verdictClass, verdictTitle, verdictDesc;
+    if (ai.botReplicationDetected || ai.biasLevel === 'Alto' || ai.duplicateCount > 2) {
+        verdictClass = 'danger';
+        verdictTitle = 'SUSPEITO';
+        verdictDesc = 'A IA detectou padrão de bot, replicação artificial ou alto nível de viés emocional de manipulação.';
+    } else if (ai.echoChamberDetected || ai.biasLevel === 'Médio') {
+        verdictClass = 'warn';
+        verdictTitle = 'ATENÇÃO';
+        verdictDesc = 'Informação com divergências ou câmara de eco detectada. Verifique em fontes independentes.';
+    } else {
+        verdictClass = 'safe';
+        verdictTitle = 'CONFIÁVEL';
+        verdictDesc = 'A IA não identificou padrões de fake news, bots ou vieses significativos nesta informação.';
+    }
 
-        function showError(title, desc) {
-            document.getElementById('errorTitle').innerText = title;
-            document.getElementById('errorDesc').innerText = desc;
-            showView('error');
-        }
+    const verdictCard = document.getElementById('verdictCard');
+    verdictCard.className = `verdict-card ${verdictClass}`;
 
-        // --- 4. MOTOR DE MONTAGEM E RENDERIZAÇÃO DA UI ---
-        function processAndRender(searchTopic, realResults, aiData, originalArticleSource) {
-            const analyzedSources = [];
-            document.getElementById('hashId').innerText = `HASH: #${Math.floor(10000 + Math.random() * 90000)}`;
-            const baseDate = new Date();
+    const orbIcons = {
+        safe: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
+        warn: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+        danger: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
+    };
 
-            // 1. Se houver um link original colado, adicioná-lo na lista de fontes
-            if (originalArticleSource) {
-                let pubDate = new Date(baseDate);
-                // A notícia colada é tratada como a "origem" temporal para a timeline
-                pubDate.setDate(pubDate.getDate() - 10); 
-                
-                analyzedSources.push({
-                    id: originalArticleSource.id,
-                    type: originalArticleSource.type, // 'analisada'
-                    title: originalArticleSource.title,
-                    dateObj: pubDate,
-                    date: pubDate.toISOString().split('T')[0],
-                    text: originalArticleSource.snippet,
-                    confidence: 100 - aiData.biasIntensity, // Confiança baseada no viés da IA
-                    url: originalArticleSource.url,
-                    isOriginalLink: true
-                });
-            }
+    document.getElementById('verdictOrb').innerHTML = orbIcons[verdictClass];
+    document.getElementById('verdictTag').textContent = verdictTitle;
+    document.getElementById('verdictLabel').textContent = verdictTitle;
+    document.getElementById('verdictDesc').textContent = verdictDesc;
+    document.getElementById('hashId').textContent = 'HASH: ' + randomHash();
 
-            // 2. Adicionar as fontes encontradas na web para cruzamento
-            for (let i = 0; i < realResults.length; i++) {
-                const item = realResults[i];
-                const cleanSnippet = stripHtmlTags(item.snippet);
-                const itemTitle = item.title;
-                
-                let typeAssigned = 'oficial';
-                if (i % 2 !== 0) typeAssigned = 'imprensa';
-                if (aiData.biasIntensity > 50 && i > 3) typeAssigned = 'blog';
-                if (i === 1) typeAssigned = 'checagem';
+    // Metrics
+    document.getElementById('metricSources').textContent = sources.length;
+    document.getElementById('metricDiversity').textContent = diversityPct + '%';
+    document.getElementById('metricDiversitySub').textContent = diversityPct > 60 ? 'Múltiplos grupos' : 'Consenso frágil';
+    document.getElementById('metricDuplicates').textContent = ai.duplicateCount || 0;
+    document.getElementById('metricBias').textContent = ai.biasLevel || '—';
+    document.getElementById('metricBiasSub').textContent = (ai.biasIntensity || 0) + '% carga emocional';
 
-                let confidence = 100 - (aiData.biasIntensity / 3) - (i * 2);
-                if (confidence < 20) confidence = 20;
+    // Diagnosis
+    const echoIcon = document.getElementById('echoIcon');
+    if (ai.echoChamberDetected) {
+        echoIcon.style.cssText = 'background:var(--yellow-dim);color:var(--yellow);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('echoStatus').textContent = 'Câmara de eco detectada';
+        document.getElementById('echoStatus').style.color = 'var(--yellow)';
+    } else {
+        echoIcon.style.cssText = 'background:var(--green-dim);color:var(--green);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('echoStatus').textContent = 'Consenso orgânico confirmado';
+        document.getElementById('echoStatus').style.color = 'var(--green)';
+    }
 
-                let pubDate = new Date(baseDate);
-                pubDate.setDate(pubDate.getDate() - (i + 1)); 
+    const botIcon = document.getElementById('botIcon');
+    if (ai.botReplicationDetected) {
+        botIcon.style.cssText = 'background:var(--red-dim);color:var(--red);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('botStatus').textContent = 'Replicação artificial detectada';
+        document.getElementById('botStatus').style.color = 'var(--red)';
+    } else {
+        botIcon.style.cssText = 'background:var(--accent-dim);color:var(--accent);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
+        document.getElementById('botStatus').textContent = 'Nenhum padrão de bot detectado';
+    }
 
-                analyzedSources.push({
-                    id: item.pageid,
-                    type: typeAssigned,
-                    title: `REFERÊNCIA WEB: ${itemTitle}`,
-                    dateObj: pubDate,
-                    date: pubDate.toISOString().split('T')[0],
-                    text: cleanSnippet + '...',
-                    confidence: confidence,
-                    url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
-                    isOriginalLink: false
-                });
-            }
+    const concEl = document.getElementById('aiConclusionText');
+    concEl.innerHTML = `<strong>RESUMO DA IA:</strong> ${ai.aiConclusion || "Análise completada sem alertas."}`;
+    const concBox = concEl.parentElement;
+    if (ai.biasLevel === 'Alto' || ai.botReplicationDetected) {
+        concBox.style.borderColor = 'var(--red)';
+    } else if (ai.biasLevel === 'Médio') {
+        concBox.style.borderColor = 'var(--yellow)';
+    } else {
+        concBox.style.borderColor = 'var(--accent-mid)';
+    }
 
-            analyzedSources.sort((a, b) => a.dateObj - b.dateObj);
-            const totalSourcesCount = analyzedSources.length;
-
-            // --- Cálculos Finais e UI Semáforo usando as respostas da IA ---
-            let diversityPercent = 100 - (aiData.duplicateCount * 15);
-            if(aiData.echoChamberDetected) diversityPercent -= 20;
-            if(diversityPercent < 0) diversityPercent = 0;
-            if(diversityPercent > 100) diversityPercent = 100;
-
-            let statusObj = { color: '', colorHex: '', title: '', desc: '', icon: '' };
-
-            const iconShield = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><polyline points="9 12 11 14 15 10"></polyline></svg>`;
-            const iconAlert = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-            const iconDanger = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>`;
-
-            if (aiData.botReplicationDetected || aiData.biasLevel === 'Alto' || aiData.duplicateCount > 2) {
-                statusObj.color = 'var(--color-red-dim)';
-                statusObj.colorHex = 'var(--color-red)';
-                statusObj.title = 'SUSPEITO';
-                statusObj.desc = 'A informação foi detectada como padrão de bot / replicação artificial ou contém alto viés de manipulação.';
-                statusObj.icon = iconDanger;
-            } else if (aiData.echoChamberDetected || aiData.biasLevel === 'Médio') {
-                statusObj.color = 'var(--color-yellow-dim)';
-                statusObj.colorHex = 'var(--color-yellow)';
-                statusObj.title = 'ATENÇÃO';
-                statusObj.desc = 'Informação isolada ou com divergências. O consenso do grupo formador é frágil (possível câmara de eco).';
-                statusObj.icon = iconAlert;
-            } else {
-                statusObj.color = 'var(--color-green-bg)';
-                statusObj.colorHex = 'var(--color-green)';
-                statusObj.title = 'CONFIÁVEL';
-                statusObj.desc = 'A informação está em sites confiáveis e a IA não identificou padrão de bots ou fake news.';
-                statusObj.icon = iconShield;
-            }
-
-            // Atualizando a Interface do Semáforo
-            document.getElementById('statusIconWrapper').style.backgroundColor = statusObj.color;
-            document.getElementById('statusTag').style.color = statusObj.colorHex;
-            document.getElementById('statusTag').style.borderColor = statusObj.colorHex;
-            document.getElementById('statusIcon').style.backgroundColor = statusObj.colorHex;
-            document.getElementById('statusIcon').innerHTML = statusObj.icon;
-            
-            const highlight = document.getElementById('statusTitleHighlight');
-            highlight.innerText = statusObj.title;
-            highlight.style.color = statusObj.colorHex;
-            document.getElementById('statusDesc').innerText = statusObj.desc;
-
-            // Cards Superiores
-            document.getElementById('metricSources').innerText = totalSourcesCount;
-            document.getElementById('metricDiversity').innerText = diversityPercent + '%';
-            document.getElementById('metricDiversitySub').innerText = diversityPercent > 60 ? 'Múltiplos Grupos' : 'Consenso Frágil';
-            document.getElementById('metricDuplicates').innerText = aiData.duplicateCount || 0;
-            document.getElementById('metricBias').innerText = aiData.biasLevel;
-            document.getElementById('metricBiasSub').innerText = `${aiData.biasIntensity || 0}% de Carga Emocional`;
-
-            // Painel Espectral e Bots
-            if(!aiData.echoChamberDetected) {
-                document.getElementById('specEcoStatus').innerText = 'Consenso Orgânico Confirmado pela IA';
-                document.getElementById('specEcoStatus').style.color = 'var(--text-muted)';
-                document.getElementById('specEcoIcon').style.color = 'var(--color-green)';
-            } else {
-                document.getElementById('specEcoStatus').innerText = 'Alerta da IA: Câmara de Eco Formada';
-                document.getElementById('specEcoStatus').style.color = 'var(--color-yellow)';
-                document.getElementById('specEcoIcon').style.color = 'var(--color-yellow)';
-            }
-            
-            if(aiData.botReplicationDetected) {
-                document.getElementById('specRepStatus').innerText = `A IA detectou padrão de replicação artificial`;
-                document.getElementById('specRepStatus').style.color = 'var(--color-red)';
-                document.getElementById('specRepIcon').style.backgroundColor = 'var(--color-red-dim)';
-                document.getElementById('specRepIcon').style.color = 'var(--color-red)';
-            } else {
-                document.getElementById('specRepStatus').innerText = 'Nenhuma ação de bot detectada';
-                document.getElementById('specRepStatus').style.color = 'var(--text-muted)';
-                document.getElementById('specRepIcon').style.backgroundColor = 'var(--color-blue-dim)';
-                document.getElementById('specRepIcon').style.color = 'var(--color-blue)';
-            }
-
-            // Resumo direto da IA
-            document.getElementById('nlpWarningText').innerHTML = `<strong>RESUMO DA IA:</strong> ${aiData.aiConclusion || "Análise completada sem alertas verbais da IA."}`;
-            if(aiData.biasLevel === 'Alto' || aiData.botReplicationDetected) {
-                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'var(--color-red)';
-                document.getElementById('nlpWarningText').style.color = 'var(--color-red)';
-            } else if (aiData.biasLevel === 'Médio') {
-                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'var(--color-yellow)';
-                document.getElementById('nlpWarningText').style.color = 'var(--color-yellow)';
-            } else {
-                document.getElementById('nlpWarningText').parentElement.style.borderColor = 'rgba(59, 130, 246, 0.3)';
-                document.getElementById('nlpWarningText').style.color = '#9ca3af';
-            }
-
-            // Renderizar Lista de Fontes
-            const listContainer = document.getElementById('sourcesList');
-            listContainer.innerHTML = ''; 
-
-            analyzedSources.forEach(source => {
-                const typeClass = `type-${source.type}`;
-                const displayType = CATEGORIES[source.type] || 'Fonte da Web'; 
-                
-                let barColor = 'var(--color-green)';
-                if(source.confidence < 40) barColor = 'var(--color-red)';
-                else if(source.confidence < 70) barColor = 'var(--color-yellow)';
-
-                // Destaque visual se for o link colado pelo usuário
-                const cardHighlightClass = source.isOriginalLink ? 'origin-card' : '';
-                const tagTitle = source.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : source.title;
-
-                const itemHtml = `
-                    <div class="source-card ${cardHighlightClass}">
-                        <div class="source-top">
-                            <span class="source-type ${typeClass}">${displayType}</span>
-                            <span class="source-date">${source.date}</span>
+    // Sources
+    const srcList = document.getElementById('sourcesList');
+    srcList.innerHTML = '';
+    sources.forEach(src => {
+        let barColor = src.confidence >= 70 ? 'var(--green)' : src.confidence >= 40 ? 'var(--yellow)' : 'var(--red)';
+        const typeLabel = CATEGORIES[src.type] || 'Fonte';
+        srcList.insertAdjacentHTML('beforeend', `
+            <div class="source-card ${src.isOriginalLink ? 'origin-card' : ''}">
+                <div class="source-head">
+                    <span class="type-badge type-${src.type}">${typeLabel}</span>
+                    <span class="source-date">${src.date}</span>
+                </div>
+                <div class="source-title" ${src.isOriginalLink ? 'style="color:var(--accent)"' : ''}>${src.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : src.title}</div>
+                <div class="source-excerpt">${src.text}</div>
+                <div class="source-foot">
+                    <div class="conf-bar-wrap">
+                        <div class="conf-track">
+                            <div class="conf-fill" style="width:${src.confidence}%;background:${barColor}"></div>
                         </div>
-                        <h4 class="source-title" style="${source.isOriginalLink ? 'color: #60a5fa;' : ''}">${tagTitle}</h4>
-                        <p class="source-text">${source.text}</p>
-                        <div class="source-bottom">
-                            <div class="confidence-area">
-                                <div class="confidence-bar-bg">
-                                    <div class="confidence-bar-fill" style="width: ${source.confidence}%; background-color: ${barColor};"></div>
-                                </div>
-                                <span class="confidence-label">Confiança Web (${Math.round(source.confidence)}%)</span>
-                            </div>
-                            <a href="${source.url}" target="_blank" class="btn-go" title="Abrir link original da fonte">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-                            </a>
-                        </div>
+                        <span class="conf-label">Confiança ${Math.round(src.confidence)}%</span>
                     </div>
-                `;
-                listContainer.insertAdjacentHTML('beforeend', itemHtml);
-            });
+                    <a href="${src.url}" target="_blank" class="btn-source-link" title="Abrir fonte original">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+                    </a>
+                </div>
+            </div>
+        `);
+    });
 
-            // Geração da Linha do Tempo
-            const timelineContainer = document.getElementById('timelineContainer');
-            timelineContainer.innerHTML = '';
+    // Timeline
+    const tlContainer = document.getElementById('timelineContainer');
+    tlContainer.innerHTML = '';
+    sources.forEach((src, idx) => {
+        const typeLabel = CATEGORIES[src.type] || 'Web';
+        let iconClass = 'tl-icon';
+        let iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
 
-            analyzedSources.forEach((source, index) => {
-                const displayType = CATEGORIES[source.type] || 'Fonte Web';
-                
-                let iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>`;
-                let iconClass = "node-icon";
-
-                if (source.isOriginalLink) {
-                    // Ícone azul para o link que a pessoa colou
-                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>`;
-                    iconClass += " analyzed";
-                } else if (index === 0 && (source.type === 'blog' || aiData.biasLevel === 'Alto')) {
-                    // Origem Duvidosa na web
-                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>`;
-                    iconClass += " origin";
-                } else if (source.type === 'oficial' || source.type === 'checagem') {
-                    // Origem Confiável
-                    iconHtml = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
-                    iconClass += " safe";
-                }
-
-                const nodeHtml = `
-                    <div class="timeline-node">
-                        <div class="node-date">${source.date}</div>
-                        <div class="${iconClass}">${iconHtml}</div>
-                        <div class="node-type type-${source.type}">${displayType}</div>
-                        <div class="node-title">${source.isOriginalLink ? 'Seu Link' : source.title}</div>
-                        ${source.isOriginalLink ? '<span style="font-size:0.6rem; color:#60a5fa; margin-top:4px;">🔍 Alvo</span>' : ''}
-                    </div>
-                `;
-                timelineContainer.insertAdjacentHTML('beforeend', nodeHtml);
-            });
-
-            showView('results');
+        if (src.isOriginalLink) {
+            iconClass += ' analyzed';
+            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
+        } else if (src.type === 'oficial' || src.type === 'checagem') {
+            iconClass += ' safe';
+            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
+        } else if (idx === 0 && (src.type === 'blog' || ai.biasLevel === 'Alto')) {
+            iconClass += ' origin';
         }
 
-    </script>
+        tlContainer.insertAdjacentHTML('beforeend', `
+            <div class="tl-node">
+                <div class="tl-date">${src.date}</div>
+                <div class="${iconClass}">${iconSvg}</div>
+                <span class="tl-badge type-${src.type}">${typeLabel}</span>
+                <div class="tl-title">${src.isOriginalLink ? 'Seu link' : (src.title || '').replace('REFERÊNCIA: ', '')}</div>
+            </div>
+        `);
+    });
+
+    // Suggestions (NEW!)
+    renderSuggestions(searchTopic, ai, verdictClass);
+
+    showView('results');
+}
+
+// ── SUGGESTIONS GENERATOR ──
+function renderSuggestions(topic, ai, verdictClass) {
+    const suggestions = [];
+
+    suggestions.push({
+        icon: '🔎',
+        title: 'Pesquise no Google Fact Check',
+        desc: `Procure por "${topic}" no Google com o filtro fact-check ativado para encontrar verificações profissionais.`,
+        bg: 'var(--accent-dim)'
+    });
+
+    suggestions.push({
+        icon: '📚',
+        title: 'Consulte Agências de Checagem',
+        desc: 'Verifique no Aos Fatos, Agência Lupa, E-farsas ou AFP Checamos — todas especializadas em desinformação no Brasil.',
+        bg: 'var(--green-dim)'
+    });
+
+    if (ai.echoChamberDetected) {
+        suggestions.push({
+            icon: '🌐',
+            title: 'Busque Fontes Diversas',
+            desc: 'Foi detectada câmara de eco. Procure o mesmo tema em veículos de espectros políticos diferentes para comparar narrativas.',
+            bg: 'var(--yellow-dim)'
+        });
+    }
+
+    if (ai.biasLevel === 'Alto' || ai.biasLevel === 'Médio') {
+        suggestions.push({
+            icon: '🧪',
+            title: 'Analise a Linguagem Emocional',
+            desc: 'Textos com alto viés emocional costumam usar palavras de medo, raiva ou urgência. Pergunte-se: essa notícia quer me informar ou me emocionar?',
+            bg: 'var(--red-dim)'
+        });
+    }
+
+    if (ai.botReplicationDetected) {
+        suggestions.push({
+            icon: '🤖',
+            title: 'Verifique a Origem da Publicação',
+            desc: 'Foi detectado padrão de replicação artificial. Confira se os sites que publicam o conteúdo têm CNPJ, equipe editorial e histórico de publicações.',
+            bg: 'var(--red-dim)'
+        });
+    }
+
+    suggestions.push({
+        icon: '🕵️',
+        title: 'Rastreie a Imagem Original',
+        desc: 'Se a notícia tiver fotos, use o Google Imagens ou TinEye para verificar quando e onde a imagem apareceu pela primeira vez.',
+        bg: 'var(--accent-dim)'
+    });
+
+    if (verdictClass === 'safe') {
+        suggestions.push({
+            icon: '✅',
+            title: 'Compartilhe com responsabilidade',
+            desc: 'Mesmo informações confiáveis podem ser descontextualizadas. Ao compartilhar, inclua a fonte e a data original da notícia.',
+            bg: 'var(--green-dim)'
+        });
+    }
+
+    const list = document.getElementById('suggestionList');
+    list.innerHTML = '';
+    suggestions.forEach(s => {
+        list.insertAdjacentHTML('beforeend', `
+            <div class="suggestion-item">
+                <div class="sug-icon" style="background:${s.bg}">${s.icon}</div>
+                <div class="sug-text">
+                    <div class="sug-title">${s.title}</div>
+                    <div class="sug-desc">${s.desc}</div>
+                </div>
+            </div>
+        `);
+    });
+}
+</script>
 </body>
 </html>
