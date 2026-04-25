@@ -266,7 +266,7 @@ export default function App() {
               <ShieldCheck size={22} />
             </div>
             <h1 className="font-black text-xl tracking-tighter uppercase">
-              VerifEye <span className="text-slate-500 font-medium">OS 1.0</span>
+              Filtro Digital <span className="text-slate-500 font-medium">1.0</span>
             </h1>
           </div>
           <nav className="hidden md:flex gap-8 items-center">
