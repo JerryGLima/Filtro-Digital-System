@@ -1348,7 +1348,7 @@ async function fetchWikipedia(query) {
 // 🤖 GEMINI — Extrai tema do artigo
 // ══════════════════════════════════════════════════════════
 async function extractTopicWithGemini(text) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
     const prompt = `Resuma este texto em no máximo 4 palavras-chave em português identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
     const res = await fetch(url, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -1362,7 +1362,7 @@ async function extractTopicWithGemini(text) {
 // 🤖 GEMINI — Analisa viés, bots e câmara de eco
 // ══════════════════════════════════════════════════════════
 async function analyzeWithGemini(snippets, topic) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`;
     const prompt = `Você é um sistema profissional de detecção de desinformação. Analise os trechos abaixo sobre o tema "${topic}".
 [Fonte 1] é o conteúdo fornecido pelo usuário. As demais são fontes cruzadas da web/notícias.
 
