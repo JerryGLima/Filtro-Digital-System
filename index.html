@@ -1090,6 +1090,17 @@
             <span class="pill">📡 Câmara de Eco</span>
         </div>
 
+        <!-- GNews info banner -->
+        <div style="margin-top:1.5rem;width:100%;max-width:680px;background:rgba(0,230,118,0.06);border:1px solid rgba(0,230,118,0.2);border-radius:10px;padding:0.9rem 1rem;display:flex;align-items:flex-start;gap:10px;">
+            <span style="font-size:1.1rem;flex-shrink:0;">📰</span>
+            <div>
+                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;color:#00e676;margin-bottom:3px;">GNews API — Notícias Reais em Português</div>
+                <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);line-height:1.5;">
+                    Cadastre-se grátis em <a href="https://gnews.io" target="_blank" style="color:var(--accent);text-decoration:none;">gnews.io</a> (sem cartão de crédito) · 100 req/dia · Suporta PT-BR · Cole sua chave no código na linha <code style="background:rgba(0,0,0,0.4);padding:1px 5px;border-radius:3px;">GNEWS_KEY</code>
+                </div>
+            </div>
+        </div>
+
         <div class="how-grid">
             <div class="how-card">
                 <div class="how-num">01</div>
@@ -1217,7 +1228,7 @@
 
         <!-- Sources -->
         <div class="sources-section">
-            <div class="section-label">Fontes Reais Extraídas da Web</div>
+            <div class="section-label" style="justify-content:space-between;">Fontes Reais Extraídas da Web <span id="sourcesBadge" style="font-family:var(--font-mono);font-size:0.6rem;letter-spacing:1px;"></span></div>
             <div class="sources-list" id="sourcesList"></div>
         </div>
 
@@ -1245,20 +1256,31 @@
     <div class="footer-pills">
         <span class="footer-pill">DADOS REAIS</span>
         <span class="footer-pill">CORS BYPASS</span>
+        <span class="footer-pill">GNEWS API</span>
         <span class="footer-pill">GEMINI API</span>
     </div>
 </footer>
 
 <script>
-// ── CONFIGURAÇÕES ──
-const apiKey = "AIzaSyDOfjXlsdO9-X1Ng1FvnrPU5KUF9b0ab6Y";
+// ══════════════════════════════════════════════════════════
+// FILTRO DIGITAL 2.0 — Configurações de API
+// ══════════════════════════════════════════════════════════
+
+// 🔑 Gemini (Google AI) — sua chave atual
+const GEMINI_KEY = "AIzaSyDOfjXlsdO9-X1Ng1FvnrPU5KUF9b0ab6Y";
+
+// 📰 GNews API — Cadastro GRATUITO em: https://gnews.io
+// Plano free: 100 req/dia · 10 artigos/req · CORS habilitado · Português BR
+// Após se cadastrar, cole sua chave aqui:
+const GNEWS_KEY = "";  // ← cole sua chave GNews aqui
 
 const CATEGORIES = {
     'imprensa': 'Imprensa',
     'oficial': 'Oficial',
     'blog': 'Blog',
     'checagem': 'Checagem',
-    'analisada': 'Link Analisado'
+    'analisada': 'Link Analisado',
+    'gnews': 'Notícia Real'
 };
 
 // ── VIEW MANAGER ──
@@ -1276,16 +1298,14 @@ document.getElementById('mainInput').addEventListener('keypress', e => {
     if (e.key === 'Enter') startAnalysis();
 });
 
-// ── PROGRESS ──
-let steps = [];
+// ── PROGRESS LOG ──
 function logStep(text, state = 'active') {
     const log = document.getElementById('stepsLog');
-    // Mark previous active as done
     const prev = log.querySelector('.step-line.active');
-    if (prev) prev.classList.replace('active', 'done');
+    if (prev) { prev.classList.replace('active', 'done'); prev.textContent = '✓ ' + prev.textContent.slice(2); }
     const el = document.createElement('div');
     el.className = `step-line ${state}`;
-    el.textContent = `${state === 'done' ? '✓' : '›'} ${text}`;
+    el.textContent = `› ${text}`;
     log.appendChild(el);
     document.getElementById('loadingStep').textContent = text;
 }
@@ -1295,32 +1315,56 @@ function setProgress(pct) {
 }
 
 // ── UTILS ──
-function stripHtml(str) {
-    return str ? str.replace(/<[^>]*>/g, '') : '';
+function stripHtml(str) { return str ? str.replace(/<[^>]*>/g, '') : ''; }
+function randomHash() { return '#' + Math.floor(10000 + Math.random() * 90000); }
+
+// ══════════════════════════════════════════════════════════
+// 📰 GNEWS API — Busca notícias reais em Português
+// ══════════════════════════════════════════════════════════
+async function fetchGNews(query) {
+    if (!GNEWS_KEY) return null; // sem chave, pula para Wikipedia
+
+    const url = `https://gnews.io/api/v4/search?q=${encodeURIComponent(query)}&lang=pt&country=br&max=6&token=${GNEWS_KEY}`;
+    try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`GNews HTTP ${res.status}`);
+        const data = await res.json();
+        return data.articles || [];
+    } catch (e) {
+        console.warn('GNews falhou, usando Wikipedia como fallback:', e);
+        return null;
+    }
 }
 
-function randomHash() {
-    return '#' + Math.floor(10000 + Math.random() * 90000);
+// ── WIKIPEDIA FALLBACK ──
+async function fetchWikipedia(query) {
+    const url = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(query)}&utf8=&format=json&origin=*`;
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data.query?.search || []).slice(0, 6);
 }
 
-// ── GEMINI: EXTRACT TOPIC ──
+// ══════════════════════════════════════════════════════════
+// 🤖 GEMINI — Extrai tema do artigo
+// ══════════════════════════════════════════════════════════
 async function extractTopicWithGemini(text) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-    const prompt = `Resuma este texto em no máximo 4 palavras-chave em português, identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
+    const prompt = `Resuma este texto em no máximo 4 palavras-chave em português identificando o assunto principal. Retorne APENAS as palavras-chave, sem aspas, pontos ou explicações.\n\nTexto: ${text.substring(0, 1500)}`;
     const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
     });
     const data = await res.json();
     return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || "";
 }
 
-// ── GEMINI: ANALYZE ──
+// ══════════════════════════════════════════════════════════
+// 🤖 GEMINI — Analisa viés, bots e câmara de eco
+// ══════════════════════════════════════════════════════════
 async function analyzeWithGemini(snippets, topic) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${GEMINI_KEY}`;
     const prompt = `Você é um sistema profissional de detecção de desinformação. Analise os trechos abaixo sobre o tema "${topic}".
-[Fonte 1] é o conteúdo fornecido pelo usuário. As demais são fontes cruzadas da web.
+[Fonte 1] é o conteúdo fornecido pelo usuário. As demais são fontes cruzadas da web/notícias.
 
 Avalie:
 1. Linguagem emocional ou enviesada
@@ -1352,8 +1396,7 @@ ${snippets.map((s, i) => `[Fonte ${i + 1}]: ${s}`).join('\n\n')}`;
     for (let i = 0; i < 6; i++) {
         try {
             const res = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
             if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -1368,7 +1411,9 @@ ${snippets.map((s, i) => `[Fonte ${i + 1}]: ${s}`).join('\n\n')}`;
     }
 }
 
-// ── MAIN FLOW ──
+// ══════════════════════════════════════════════════════════
+// 🚀 FLUXO PRINCIPAL
+// ══════════════════════════════════════════════════════════
 async function startAnalysis() {
     const input = document.getElementById('mainInput').value.trim();
     if (!input) { alert("Insira um link ou tema para analisar."); return; }
@@ -1381,8 +1426,9 @@ async function startAnalysis() {
     let searchTopic = input;
     let originalArticleSource = null;
 
+    // ── ETAPA 1: Leitura de URL ──
     if (isUrl) {
-        logStep("Link detectado. Contornando CORS...");
+        logStep("Link detectado. Extraindo conteúdo...");
         setProgress(15);
         try {
             const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(input)}`;
@@ -1392,19 +1438,18 @@ async function startAnalysis() {
             const doc = new DOMParser().parseFromString(data.contents, 'text/html');
             const title = doc.querySelector('title')?.textContent || 'Artigo Analisado';
             const paragraphs = Array.from(doc.querySelectorAll('p'))
-                .map(p => p.textContent.trim())
-                .filter(t => t.length > 50)
-                .join(' ')
-                .substring(0, 2500);
+                .map(p => p.textContent.trim()).filter(t => t.length > 50)
+                .join(' ').substring(0, 2500);
 
             if (!paragraphs) throw new Error("Nenhum texto encontrado.");
 
-            logStep("Extraindo tema central com IA...", 'active');
-            setProgress(35);
+            logStep("Identificando tema com IA Gemini...");
+            setProgress(30);
             searchTopic = await extractTopicWithGemini(paragraphs);
 
             originalArticleSource = {
-                id: 'origin', type: 'analisada', title, snippet: paragraphs.substring(0, 300) + "...", url: input
+                id: 'origin', type: 'analisada', title,
+                snippet: paragraphs.substring(0, 300) + "...", url: input
             };
         } catch (e) {
             showError("Link Bloqueado ou Inválido", "Não foi possível ler este link. Alguns sites bloqueiam a extração. Tente digitar o título da notícia.");
@@ -1412,29 +1457,45 @@ async function startAnalysis() {
         }
     }
 
-    logStep(`Buscando fontes cruzadas: "${searchTopic}"...`);
+    // ── ETAPA 2: Busca de Notícias ──
+    const usingGNews = !!GNEWS_KEY;
+    logStep(usingGNews
+        ? `📰 Buscando notícias reais via GNews: "${searchTopic}"...`
+        : `🔍 Buscando fontes via Wikipedia: "${searchTopic}"...`);
     setProgress(50);
 
-    let searchResults = [];
-    try {
-        const endpoint = `https://pt.wikipedia.org/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchTopic)}&utf8=&format=json&origin=*`;
-        const res = await fetch(endpoint);
-        const data = await res.json();
-        searchResults = data.query.search || [];
-    } catch (err) {
-        showError("Falha de Conexão", "Não foi possível conectar aos servidores de dados públicos.");
-        return;
+    let gnewsArticles = null;
+    let wikiResults = [];
+    let sourceMode = 'wiki';
+
+    if (usingGNews) {
+        gnewsArticles = await fetchGNews(searchTopic);
+        if (gnewsArticles && gnewsArticles.length > 0) {
+            sourceMode = 'gnews';
+        } else {
+            // fallback Wikipedia
+            gnewsArticles = null;
+            wikiResults = await fetchWikipedia(searchTopic).catch(() => []);
+        }
+    } else {
+        wikiResults = await fetchWikipedia(searchTopic).catch(() => []);
     }
 
-    if (!originalArticleSource && searchResults.length === 0) {
+    const hasData = (gnewsArticles && gnewsArticles.length > 0) || wikiResults.length > 0 || originalArticleSource;
+    if (!hasData) {
         showError("Nenhum resultado", "O termo pesquisado não gerou dados suficientes. Tente um tema mais abrangente.");
         return;
     }
 
-    const resultsToProcess = searchResults.slice(0, 5);
+    // ── ETAPA 3: Gemini Analisa ──
     let snippetsForAI = [];
     if (originalArticleSource) snippetsForAI.push(originalArticleSource.snippet);
-    resultsToProcess.forEach(item => snippetsForAI.push(stripHtml(item.snippet)));
+
+    if (sourceMode === 'gnews') {
+        gnewsArticles.forEach(a => snippetsForAI.push((a.description || a.title || '').substring(0, 400)));
+    } else {
+        wikiResults.forEach(w => snippetsForAI.push(stripHtml(w.snippet)));
+    }
 
     logStep("Submetendo à IA Gemini para análise...");
     setProgress(75);
@@ -1443,14 +1504,14 @@ async function startAnalysis() {
     try {
         geminiResult = await analyzeWithGemini(snippetsForAI, searchTopic);
     } catch (err) {
-        showError("Falha na IA", "Não foi possível processar com a IA Gemini. Verifique sua API Key.");
+        showError("Falha na IA", "Não foi possível processar com o Gemini. Verifique sua API Key.");
         return;
     }
 
-    logStep("Construindo relatório final...", 'done');
+    logStep("Construindo relatório...", 'done');
     setProgress(100);
 
-    setTimeout(() => renderResults(searchTopic, resultsToProcess, geminiResult, originalArticleSource), 500);
+    setTimeout(() => renderResults(searchTopic, { gnewsArticles, wikiResults, sourceMode }, geminiResult, originalArticleSource), 500);
 }
 
 function showError(title, desc) {
@@ -1459,61 +1520,80 @@ function showError(title, desc) {
     showView('error');
 }
 
-// ── RENDER ──
-function renderResults(searchTopic, realResults, ai, originalSource) {
+// ══════════════════════════════════════════════════════════
+// 🖼️ RENDERIZAÇÃO DOS RESULTADOS
+// ══════════════════════════════════════════════════════════
+function renderResults(searchTopic, newsData, ai, originalSource) {
+    const { gnewsArticles, wikiResults, sourceMode } = newsData;
     const base = new Date();
     const sources = [];
 
     if (originalSource) {
-        const d = new Date(base);
-        d.setDate(d.getDate() - 10);
-        sources.push({ ...originalSource, dateObj: d, date: d.toISOString().split('T')[0], text: originalSource.snippet, confidence: 100 - ai.biasIntensity, isOriginalLink: true });
+        const d = new Date(base); d.setDate(d.getDate() - 10);
+        sources.push({ ...originalSource, dateObj: d, date: d.toISOString().split('T')[0],
+            text: originalSource.snippet, confidence: 100 - ai.biasIntensity, isOriginalLink: true });
     }
 
-    realResults.forEach((item, i) => {
-        let type = 'oficial';
-        if (i % 2 !== 0) type = 'imprensa';
-        if (ai.biasIntensity > 50 && i > 3) type = 'blog';
-        if (i === 1) type = 'checagem';
+    if (sourceMode === 'gnews' && gnewsArticles) {
+        gnewsArticles.forEach((art, i) => {
+            const pubDate = art.publishedAt ? new Date(art.publishedAt) : new Date(base.getTime() - (i + 1) * 86400000);
+            let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
+            if (conf < 20) conf = 20;
 
-        let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
-        if (conf < 20) conf = 20;
+            // Classifica tipo baseado no domínio da fonte
+            let type = 'imprensa';
+            const src = (art.source?.name || '').toLowerCase();
+            if (src.includes('gov') || src.includes('oficial')) type = 'oficial';
+            else if (src.includes('fatos') || src.includes('lupa') || src.includes('checagem')) type = 'checagem';
+            else if (i % 3 === 0) type = 'gnews';
 
-        const d = new Date(base);
-        d.setDate(d.getDate() - (i + 1));
-
-        sources.push({
-            id: item.pageid, type, title: `REFERÊNCIA: ${item.title}`,
-            dateObj: d, date: d.toISOString().split('T')[0],
-            text: stripHtml(item.snippet) + '...',
-            confidence: conf, url: `https://pt.wikipedia.org/?curid=${item.pageid}`, isOriginalLink: false
+            sources.push({
+                id: `gnews-${i}`, type, isOriginalLink: false,
+                title: art.title || 'Sem título',
+                dateObj: pubDate, date: pubDate.toISOString().split('T')[0],
+                text: (art.description || 'Sem descrição disponível.'),
+                confidence: conf,
+                url: art.url || '#',
+                source: art.source?.name || 'GNews'
+            });
         });
-    });
+    } else {
+        wikiResults.forEach((item, i) => {
+            let type = i % 2 === 0 ? 'oficial' : 'imprensa';
+            if (i === 1) type = 'checagem';
+            if (ai.biasIntensity > 50 && i > 3) type = 'blog';
+            let conf = 100 - (ai.biasIntensity / 3) - (i * 2);
+            if (conf < 20) conf = 20;
+            const d = new Date(base); d.setDate(d.getDate() - (i + 1));
+            sources.push({
+                id: item.pageid, type, isOriginalLink: false,
+                title: `Wikipedia: ${item.title}`,
+                dateObj: d, date: d.toISOString().split('T')[0],
+                text: stripHtml(item.snippet) + '...',
+                confidence: conf, url: `https://pt.wikipedia.org/?curid=${item.pageid}`,
+                source: 'Wikipedia'
+            });
+        });
+    }
 
     sources.sort((a, b) => a.dateObj - b.dateObj);
 
-    // Verdict
+    // ── Veredito ──
     let diversityPct = 100 - (ai.duplicateCount * 15);
     if (ai.echoChamberDetected) diversityPct -= 20;
     diversityPct = Math.max(0, Math.min(100, diversityPct));
 
     let verdictClass, verdictTitle, verdictDesc;
     if (ai.botReplicationDetected || ai.biasLevel === 'Alto' || ai.duplicateCount > 2) {
-        verdictClass = 'danger';
-        verdictTitle = 'SUSPEITO';
+        verdictClass = 'danger'; verdictTitle = 'SUSPEITO';
         verdictDesc = 'A IA detectou padrão de bot, replicação artificial ou alto nível de viés emocional de manipulação.';
     } else if (ai.echoChamberDetected || ai.biasLevel === 'Médio') {
-        verdictClass = 'warn';
-        verdictTitle = 'ATENÇÃO';
+        verdictClass = 'warn'; verdictTitle = 'ATENÇÃO';
         verdictDesc = 'Informação com divergências ou câmara de eco detectada. Verifique em fontes independentes.';
     } else {
-        verdictClass = 'safe';
-        verdictTitle = 'CONFIÁVEL';
+        verdictClass = 'safe'; verdictTitle = 'CONFIÁVEL';
         verdictDesc = 'A IA não identificou padrões de fake news, bots ou vieses significativos nesta informação.';
     }
-
-    const verdictCard = document.getElementById('verdictCard');
-    verdictCard.className = `verdict-card ${verdictClass}`;
 
     const orbIcons = {
         safe: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>`,
@@ -1521,13 +1601,21 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
         danger: `<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
     };
 
+    document.getElementById('verdictCard').className = `verdict-card ${verdictClass}`;
     document.getElementById('verdictOrb').innerHTML = orbIcons[verdictClass];
     document.getElementById('verdictTag').textContent = verdictTitle;
     document.getElementById('verdictLabel').textContent = verdictTitle;
     document.getElementById('verdictDesc').textContent = verdictDesc;
     document.getElementById('hashId').textContent = 'HASH: ' + randomHash();
 
-    // Metrics
+    // ── Badge de fonte ──
+    const sourcesBadgeEl = document.getElementById('sourcesBadge');
+    if (sourcesBadgeEl) {
+        sourcesBadgeEl.textContent = sourceMode === 'gnews' ? '📰 GNews API' : '📖 Wikipedia';
+        sourcesBadgeEl.style.color = sourceMode === 'gnews' ? 'var(--green)' : 'var(--accent)';
+    }
+
+    // ── Métricas ──
     document.getElementById('metricSources').textContent = sources.length;
     document.getElementById('metricDiversity').textContent = diversityPct + '%';
     document.getElementById('metricDiversitySub').textContent = diversityPct > 60 ? 'Múltiplos grupos' : 'Consenso frágil';
@@ -1535,7 +1623,7 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
     document.getElementById('metricBias').textContent = ai.biasLevel || '—';
     document.getElementById('metricBiasSub').textContent = (ai.biasIntensity || 0) + '% carga emocional';
 
-    // Diagnosis
+    // ── Diagnóstico ──
     const echoIcon = document.getElementById('echoIcon');
     if (ai.echoChamberDetected) {
         echoIcon.style.cssText = 'background:var(--yellow-dim);color:var(--yellow);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
@@ -1546,7 +1634,6 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
         document.getElementById('echoStatus').textContent = 'Consenso orgânico confirmado';
         document.getElementById('echoStatus').style.color = 'var(--green)';
     }
-
     const botIcon = document.getElementById('botIcon');
     if (ai.botReplicationDetected) {
         botIcon.style.cssText = 'background:var(--red-dim);color:var(--red);width:32px;height:32px;border-radius:8px;display:grid;place-items:center;flex-shrink:0;';
@@ -1559,25 +1646,22 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
 
     const concEl = document.getElementById('aiConclusionText');
     concEl.innerHTML = `<strong>RESUMO DA IA:</strong> ${ai.aiConclusion || "Análise completada sem alertas."}`;
-    const concBox = concEl.parentElement;
-    if (ai.biasLevel === 'Alto' || ai.botReplicationDetected) {
-        concBox.style.borderColor = 'var(--red)';
-    } else if (ai.biasLevel === 'Médio') {
-        concBox.style.borderColor = 'var(--yellow)';
-    } else {
-        concBox.style.borderColor = 'var(--accent-mid)';
-    }
+    concEl.parentElement.style.borderColor = ai.biasLevel === 'Alto' || ai.botReplicationDetected ? 'var(--red)'
+        : ai.biasLevel === 'Médio' ? 'var(--yellow)' : 'var(--accent-mid)';
 
-    // Sources
+    // ── Lista de Fontes ──
     const srcList = document.getElementById('sourcesList');
     srcList.innerHTML = '';
     sources.forEach(src => {
-        let barColor = src.confidence >= 70 ? 'var(--green)' : src.confidence >= 40 ? 'var(--yellow)' : 'var(--red)';
+        const barColor = src.confidence >= 70 ? 'var(--green)' : src.confidence >= 40 ? 'var(--yellow)' : 'var(--red)';
         const typeLabel = CATEGORIES[src.type] || 'Fonte';
+        const sourceName = src.source ? `<span style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);margin-left:6px;">· ${src.source}</span>` : '';
         srcList.insertAdjacentHTML('beforeend', `
             <div class="source-card ${src.isOriginalLink ? 'origin-card' : ''}">
                 <div class="source-head">
-                    <span class="type-badge type-${src.type}">${typeLabel}</span>
+                    <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+                        <span class="type-badge type-${src.type}">${typeLabel}</span>${sourceName}
+                    </div>
                     <span class="source-date">${src.date}</span>
                 </div>
                 <div class="source-title" ${src.isOriginalLink ? 'style="color:var(--accent)"' : ''}>${src.isOriginalLink ? '📌 CONTEÚDO ANALISADO' : src.title}</div>
@@ -1589,7 +1673,7 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
                         </div>
                         <span class="conf-label">Confiança ${Math.round(src.confidence)}%</span>
                     </div>
-                    <a href="${src.url}" target="_blank" class="btn-source-link" title="Abrir fonte original">
+                    <a href="${src.url}" target="_blank" rel="noopener" class="btn-source-link" title="Abrir fonte original">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 </div>
@@ -1597,100 +1681,45 @@ function renderResults(searchTopic, realResults, ai, originalSource) {
         `);
     });
 
-    // Timeline
+    // ── Timeline ──
     const tlContainer = document.getElementById('timelineContainer');
     tlContainer.innerHTML = '';
     sources.forEach((src, idx) => {
         const typeLabel = CATEGORIES[src.type] || 'Web';
         let iconClass = 'tl-icon';
         let iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
-
-        if (src.isOriginalLink) {
-            iconClass += ' analyzed';
-            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`;
-        } else if (src.type === 'oficial' || src.type === 'checagem') {
-            iconClass += ' safe';
-            iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`;
-        } else if (idx === 0 && (src.type === 'blog' || ai.biasLevel === 'Alto')) {
-            iconClass += ' origin';
-        }
+        if (src.isOriginalLink) { iconClass += ' analyzed'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`; }
+        else if (src.type === 'oficial' || src.type === 'checagem') { iconClass += ' safe'; iconSvg = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`; }
+        else if (idx === 0 && (src.type === 'blog' || ai.biasLevel === 'Alto')) { iconClass += ' origin'; }
 
         tlContainer.insertAdjacentHTML('beforeend', `
             <div class="tl-node">
                 <div class="tl-date">${src.date}</div>
                 <div class="${iconClass}">${iconSvg}</div>
                 <span class="tl-badge type-${src.type}">${typeLabel}</span>
-                <div class="tl-title">${src.isOriginalLink ? 'Seu link' : (src.title || '').replace('REFERÊNCIA: ', '')}</div>
+                <div class="tl-title">${src.isOriginalLink ? 'Seu link' : (src.title || '').replace('Wikipedia: ', '').replace('REFERÊNCIA: ', '').substring(0, 40)}</div>
             </div>
         `);
     });
 
-    // Suggestions (NEW!)
+    // ── Sugestões ──
     renderSuggestions(searchTopic, ai, verdictClass);
-
     showView('results');
 }
 
-// ── SUGGESTIONS GENERATOR ──
+// ══════════════════════════════════════════════════════════
+// 💡 SUGESTÕES INTELIGENTES
+// ══════════════════════════════════════════════════════════
 function renderSuggestions(topic, ai, verdictClass) {
-    const suggestions = [];
-
-    suggestions.push({
-        icon: '🔎',
-        title: 'Pesquise no Google Fact Check',
-        desc: `Procure por "${topic}" no Google com o filtro fact-check ativado para encontrar verificações profissionais.`,
-        bg: 'var(--accent-dim)'
-    });
-
-    suggestions.push({
-        icon: '📚',
-        title: 'Consulte Agências de Checagem',
-        desc: 'Verifique no Aos Fatos, Agência Lupa, E-farsas ou AFP Checamos — todas especializadas em desinformação no Brasil.',
-        bg: 'var(--green-dim)'
-    });
-
-    if (ai.echoChamberDetected) {
-        suggestions.push({
-            icon: '🌐',
-            title: 'Busque Fontes Diversas',
-            desc: 'Foi detectada câmara de eco. Procure o mesmo tema em veículos de espectros políticos diferentes para comparar narrativas.',
-            bg: 'var(--yellow-dim)'
-        });
-    }
-
-    if (ai.biasLevel === 'Alto' || ai.biasLevel === 'Médio') {
-        suggestions.push({
-            icon: '🧪',
-            title: 'Analise a Linguagem Emocional',
-            desc: 'Textos com alto viés emocional costumam usar palavras de medo, raiva ou urgência. Pergunte-se: essa notícia quer me informar ou me emocionar?',
-            bg: 'var(--red-dim)'
-        });
-    }
-
-    if (ai.botReplicationDetected) {
-        suggestions.push({
-            icon: '🤖',
-            title: 'Verifique a Origem da Publicação',
-            desc: 'Foi detectado padrão de replicação artificial. Confira se os sites que publicam o conteúdo têm CNPJ, equipe editorial e histórico de publicações.',
-            bg: 'var(--red-dim)'
-        });
-    }
-
-    suggestions.push({
-        icon: '🕵️',
-        title: 'Rastreie a Imagem Original',
-        desc: 'Se a notícia tiver fotos, use o Google Imagens ou TinEye para verificar quando e onde a imagem apareceu pela primeira vez.',
-        bg: 'var(--accent-dim)'
-    });
-
-    if (verdictClass === 'safe') {
-        suggestions.push({
-            icon: '✅',
-            title: 'Compartilhe com responsabilidade',
-            desc: 'Mesmo informações confiáveis podem ser descontextualizadas. Ao compartilhar, inclua a fonte e a data original da notícia.',
-            bg: 'var(--green-dim)'
-        });
-    }
+    const suggestions = [
+        { icon: '🔎', title: 'Busque no Google Fact Check', desc: `Pesquise "${topic}" no Google com filtro "fact check" para encontrar verificações profissionais.`, bg: 'var(--accent-dim)' },
+        { icon: '📚', title: 'Agências de Checagem Brasileiras', desc: 'Verifique no Aos Fatos, Agência Lupa, E-farsas ou AFP Checamos — todas especializadas em desinformação no Brasil.', bg: 'var(--green-dim)' },
+    ];
+    if (ai.echoChamberDetected) suggestions.push({ icon: '🌐', title: 'Busque Fontes Diversas', desc: 'Câmara de eco detectada. Procure o mesmo tema em veículos de espectros políticos diferentes.', bg: 'var(--yellow-dim)' });
+    if (ai.biasLevel === 'Alto' || ai.biasLevel === 'Médio') suggestions.push({ icon: '🧪', title: 'Analise a Linguagem Emocional', desc: 'Textos com alto viés usam medo, raiva ou urgência. Pergunte-se: essa notícia quer me informar ou me emocionar?', bg: 'var(--red-dim)' });
+    if (ai.botReplicationDetected) suggestions.push({ icon: '🤖', title: 'Verifique a Origem da Publicação', desc: 'Padrão de bot detectado. Confira se os sites têm CNPJ, equipe editorial e histórico de publicações.', bg: 'var(--red-dim)' });
+    suggestions.push({ icon: '🕵️', title: 'Rastreie a Imagem Original', desc: 'Se houver fotos, use Google Imagens ou TinEye para ver onde a imagem apareceu pela primeira vez.', bg: 'var(--accent-dim)' });
+    if (verdictClass === 'safe') suggestions.push({ icon: '✅', title: 'Compartilhe com Responsabilidade', desc: 'Mesmo informações confiáveis podem ser descontextualizadas. Inclua a fonte e data ao compartilhar.', bg: 'var(--green-dim)' });
 
     const list = document.getElementById('suggestionList');
     list.innerHTML = '';
